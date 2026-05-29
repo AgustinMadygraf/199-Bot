@@ -1,4 +1,8 @@
-from typing import Protocol, Iterable
+"""
+Path: src/application/ports/tutor_ports.py
+"""
+
+from typing import Protocol, Iterable, List, Dict
 from groq.types.chat import ChatCompletionMessageParam
 
 class LLMClient(Protocol):

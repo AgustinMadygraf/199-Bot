@@ -4,7 +4,8 @@ Path: src/infrastructure/f1_api.py
 
 from datetime import datetime, timedelta, timezone
 from src.infrastructure.f1_weather import get_circuit_weather
-from src.infrastructure.requests.api import get_json
+from src.infrastructure.httpx.app import get_async_http_client
+from src.interface_adapters.gateways.api import get_json
 from src.infrastructure.settings.config import obtener_openweather_api_key
 
 
@@ -37,7 +38,7 @@ def convert_utc_to_local(date_str: str, time_str: str, local_offset_hours: int =
 
 async def get_driver_standings() -> str:
     """Clasificación actual de pilotos."""
-    data = await get_json("current/driverStandings")
+    data = await get_json(get_async_http_client, "current/driverStandings")
     if not data:
         return "No se pudo obtener la clasificación de pilotos."
 
@@ -60,7 +61,7 @@ async def get_driver_standings() -> str:
 
 async def get_constructor_standings() -> str:
     """Clasificación actual de constructores."""
-    data = await get_json("current/constructorStandings")
+    data = await get_json(get_async_http_client, "current/constructorStandings")
     if not data:
         return "No se pudo obtener la clasificación de constructores."
 
@@ -78,7 +79,7 @@ async def get_constructor_standings() -> str:
 
 async def get_last_race_results() -> str:
     """Resultados de la última carrera."""
-    data = await get_json("current/last/results")
+    data = await get_json(get_async_http_client, "current/last/results")
     if not data:
         return "No se pudo obtener los resultados."
 
@@ -103,7 +104,7 @@ async def get_last_race_results() -> str:
 
 async def get_next_race() -> str:
     """Próxima carrera del calendario con horarios locales coordinados."""
-    data = await get_json("current")
+    data = await get_json(get_async_http_client, "current")
     if not data:
         return "No se pudo obtener el calendario."
 
@@ -156,7 +157,7 @@ async def get_next_race() -> str:
 
 async def get_driver_info(driver_id: str) -> str:
     """Info de un piloto específico (por apellido o driver_id)."""
-    data = await get_json(f"current/drivers/{driver_id}")
+    data = await get_json(get_async_http_client, f"current/drivers/{driver_id}")
     if not data:
         return f"No se encontró información para el piloto '{driver_id}'."
 
@@ -176,7 +177,7 @@ async def get_driver_info(driver_id: str) -> str:
 
 async def get_season_results_summary() -> str:
     """Resumen de resultados de la temporada actual."""
-    data = await get_json("current/results")
+    data = await get_json(get_async_http_client, "current/results")
     if not data:
         return "No se pudo obtener el resumen de la temporada."
 
