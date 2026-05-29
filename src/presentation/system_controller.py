@@ -9,16 +9,14 @@ from telegram.ext import ContextTypes
 
 from src.infrastructure.settings.logger import logger
 from src.infrastructure.f1_rag import reglamento_disponible
-from src.infrastructure.db import borrar_historial, registrar_consulta
 
 class SystemController:
     """Controlador que maneja comandos globales, interacciones de texto y mensajería de voz con seguridad avanzada."""
     
-    def __init__(self, tutor_use_case, quiz_use_case, audio_service, telegram_bot):
-        self.tutor_use_case = tutor_use_case
-        self.quiz_use_case = quiz_use_case
+    def __init__(self, audio_service, telegram_bot, chat_processor):
         self.audio_service = audio_service
         self.telegram_bot = telegram_bot
+        self.chat_processor = chat_processor
 
     async def cmd_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         rag_status = "✅ Reglamento FIA indexado" if reglamento_disponible() else "⏳ Indexando reglamento..."
@@ -53,16 +51,15 @@ class SystemController:
             )
 
     async def cmd_reset(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        # 🔐 Cumplimiento de Privacidad: Eliminación total a petición del usuario
+        from src.infrastructure.db import borrar_historial
         borrar_historial(update.effective_user.id)
         await update.message.reply_text("✅ Historial borrado. ¡Volvemos a la largada!")
 
     async def manejar_mensaje(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_id = update.effective_user.id
-        username = update.effective_user.username  # 🔐 Minimización de datos (no guardamos nombres reales)
+        username = update.effective_user.username
         texto = update.message.text
         
-        # 🔐 Control de abuso (Rate Limiting)
         if self.telegram_bot.es_spammer(user_id):
             await update.message.reply_text("⚠️ ¡Boxes llenos! Por favor, esperá unos segundos antes de enviar otro mensaje.")
             return
@@ -70,14 +67,7 @@ class SystemController:
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
         
         try:
-            if self.quiz_use_case.esta_jugando(user_id):
-                resultado = self.quiz_use_case.responder(user_id, texto)
-                registrar_consulta(user_id, username, texto, "quiz_respuesta")
-                await update.message.reply_text(resultado)
-                return
-
-            respuesta = await self.tutor_use_case.ejecutar_consulta(user_id, texto)
-            registrar_consulta(user_id, username, texto, "consulta_general")
+            respuesta = await self.chat_processor.procesar(user_id, username, texto, "consulta_general")
             
             for i in range(0, len(respuesta), 4096):
                 await update.message.reply_text(respuesta[i:i + 4096])
@@ -90,20 +80,17 @@ class SystemController:
         user_id = update.effective_user.id
         username = update.effective_user.username
         
-        # 🔐 Control de abuso en audios (son procesos pesados para la API de Whisper)
         if self.telegram_bot.es_spammer(user_id):
             await update.message.reply_text("⚠️ ¡Boxes llenos! Esperá unos segundos antes de mandar otro audio.")
             return
 
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
         
-        # Declaramos la variable de ruta vacía para poder asegurar su borrado en el bloque 'finally'
         path = None
         try:
             voice = update.message.voice or update.message.audio
             file = await context.bot.get_file(voice.file_id)
             
-            # 🔐 Identificador único aleatorio de 6 caracteres para evitar colisiones entre peticiones paralelas
             id_unico = uuid.uuid4().hex[:6]
             path = f"audio_{user_id}_{id_unico}.ogg"
             
@@ -111,15 +98,13 @@ class SystemController:
             
             texto = await self.audio_service.transcribir_ogg(path)
             
-            # 🔐 Limpieza proactiva del archivo antes de enviar la consulta al LLM
             if os.path.exists(path):
                 os.remove(path)
                 path = None
                 
             await update.message.reply_text(f"🎙️ Escuché: _{texto}_", parse_mode="Markdown")
             
-            respuesta = await self.tutor_use_case.ejecutar_consulta(user_id, texto)
-            registrar_consulta(user_id, username, texto, "consulta_general_audio")
+            respuesta = await self.chat_processor.procesar(user_id, username, texto, "consulta_general_audio")
             
             for i in range(0, len(respuesta), 4096):
                 await update.message.reply_text(respuesta[i:i + 4096])
@@ -129,7 +114,6 @@ class SystemController:
             await update.message.reply_text("⚠️ No pude procesar el audio.")
             
         finally:
-            # 🔐 GANCHOS DE SEGURIDAD GARANTIZADOS: Si algo falló arriba, borramos el temporal de todas formas
             if path and os.path.exists(path):
                 try:
                     os.remove(path)
