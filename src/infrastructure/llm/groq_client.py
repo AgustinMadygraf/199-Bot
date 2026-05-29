@@ -2,13 +2,13 @@
 Path: src/infrastructure/llm/groq_client.py
 """
 
-import os
 from groq import Groq
 from typing import List, Dict
+from src.infrastructure.settings.config import obtener_groq_api_key
 
 class GroqLLMClient:
     def __init__(self):
-        self.client = Groq(api_key=os.environ["GROQ_API_KEY"])
+        self.client = Groq(api_key=obtener_groq_api_key())
         
     async def generar_respuesta(self, messages: List[Dict[str, str]]) -> str:
         respuesta = self.client.chat.completions.create(

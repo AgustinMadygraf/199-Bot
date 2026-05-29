@@ -1,7 +1,3 @@
-"""
-Path: src/infrastructure/settings/config.py
-"""
-
 import os
 from dotenv import load_dotenv
 
@@ -21,6 +17,13 @@ def obtener_token_telegram():
     if not token:
         raise ValueError("Falta la variable de entorno TELEGRAM_TOKEN")
     return token
+
+def obtener_groq_api_key():
+    """Retorna la API Key de Groq."""
+    key = os.environ.get("GROQ_API_KEY")
+    if not key:
+        raise ValueError("Falta la variable de entorno GROQ_API_KEY")
+    return key
 
 def obtener_tiempo_minimo_consulta():
     """Retorna el tiempo mínimo entre consultas (Rate Limiting)."""
