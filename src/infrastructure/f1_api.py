@@ -3,9 +3,8 @@ Path: src/infrastructure/f1_api.py
 """
 
 from datetime import datetime, timedelta, timezone
-from src.infrastructure.f1_weather import get_circuit_weather
-from src.infrastructure.httpx.app import get_async_http_client
-from src.interface_adapters.gateways.api import get_json
+from src.infrastructure.httpx.app import get_async_http_client, get_http_client
+from src.interface_adapters.gateways.api import get_json, get_openweather_report
 from src.infrastructure.settings.config import obtener_openweather_api_key, obtener_http_timeout
 
 
@@ -34,6 +33,15 @@ def convert_utc_to_local(date_str: str, time_str: str, local_offset_hours: int =
     except Exception:
         # Si falta algún dato o falla, devolvemos el string original crudo para no romper el flujo
         return f"{date_str} {time_str}"
+
+
+def get_circuit_weather(lat: float, lon: float, api_key: str) -> str:
+    """
+    Obtiene el pronóstico del clima para las coordenadas de un circuito.
+    Usa el plan gratuito de 5 días / 3 horas de OpenWeather.
+    """
+    timeout = obtener_http_timeout()
+    return get_openweather_report(get_http_client, lat, lon, api_key, timeout)
 
 
 async def get_driver_standings() -> str:
@@ -109,7 +117,7 @@ async def get_next_race() -> str:
         return "No se pudo obtener el calendario."
 
     races = data["MRData"]["RaceTable"]["Races"]
-    today = datetime.utcnow().date()
+    today = datetime.now(timezone.utc).date()
 
     proximas = [
         r for r in races
@@ -185,7 +193,7 @@ async def get_season_results_summary() -> str:
     if not races:
         return "No hay resultados aún esta temporada."
 
-    lines = [f"📊 TEMPORADA {datetime.utcnow().year} — GANADORES\n"]
+    lines = [f"📊 TEMPORADA {datetime.now(timezone.utc).year} — GANADORES\n"]
     for race in races:
         if race.get("Results"):
             winner = race["Results"][0]["Driver"]
@@ -204,7 +212,7 @@ async def get_relevant_f1_data(user_message: str) -> str:
     """
     msg = user_message.lower()
 
-    results = []
+    results: list[str] = []
 
     if any(w in msg for w in ["clasificación", "campeonato", "puntos", "líder", "primero"]):
         if any(w in msg for w in ["constructor", "escudería", "equipo", "team"]):

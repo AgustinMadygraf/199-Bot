@@ -2,7 +2,7 @@
 Path: src/application/ports/tutor_ports.py
 """
 
-from typing import Protocol, Iterable, List, Dict
+from typing import Protocol, Iterable, List
 from groq.types.chat import ChatCompletionMessageParam
 
 class LLMClient(Protocol):
@@ -19,7 +19,7 @@ class KnowledgeRepository(Protocol):
         ...
 
 class HistoryRepository(Protocol):
-    def cargar(self, user_id: int) -> List[Dict[str, str]]:
+    def cargar(self, user_id: int) -> List[ChatCompletionMessageParam]:
         ...
-    def guardar(self, user_id: int, historial: List[Dict[str, str]]) -> None:
+    def guardar(self, user_id: int, historial: List[ChatCompletionMessageParam]) -> None:
         ...
