@@ -2,7 +2,7 @@
 Path: main.py
 """
 
-from src.infrastructure.settings.config import cargar_configuracion
+from src.infrastructure.settings.config import cargar_configuracion, obtener_groq_api_key
 from src.infrastructure.settings.logger import setup_logging, logger
 
 # 1. Configuración de entorno y logs
@@ -31,7 +31,7 @@ shuffler = RandomShuffler()
 quiz_use_case = QuizUseCase(shuffler)
 
 # Inyección de dependencias para TutorUseCase
-llm_client = GroqLLMClient()
+llm_client = GroqLLMClient(api_key=obtener_groq_api_key())
 knowledge_repo = F1KnowledgeRepository()
 history_repo = DBHistoryRepository()
 tutor_use_case = TutorUseCase(llm_client, knowledge_repo, history_repo)

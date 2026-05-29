@@ -4,11 +4,10 @@ Path: src/infrastructure/llm/groq_client.py
 
 from groq import Groq
 from typing import List, Dict
-from src.infrastructure.settings.config import obtener_groq_api_key
 
 class GroqLLMClient:
-    def __init__(self):
-        self.client = Groq(api_key=obtener_groq_api_key())
+    def __init__(self, api_key: str):
+        self.client = Groq(api_key=api_key)
         
     async def generar_respuesta(self, messages: List[Dict[str, str]]) -> str:
         respuesta = self.client.chat.completions.create(
