@@ -1,35 +1,24 @@
-# src/presentation/system_controller.py
+"""
+Path: src/presentation/system_controller.py
+"""
+
 import os
-import logging
-import time  # 🔐 Necesario para medir el tiempo entre mensajes
-import uuid  # 🔐 Necesario para generar nombres de archivos temporales unívocos
+import uuid
 from telegram import Update
 from telegram.ext import ContextTypes
+
+from src.infrastructure.settings.logger import logger
 from src.infrastructure.f1_rag import reglamento_disponible
 from src.infrastructure.db import borrar_historial, registrar_consulta
 
 class SystemController:
     """Controlador que maneja comandos globales, interacciones de texto y mensajería de voz con seguridad avanzada."""
     
-    def __init__(self, tutor_use_case, quiz_use_case, audio_service):
+    def __init__(self, tutor_use_case, quiz_use_case, audio_service, telegram_bot):
         self.tutor_use_case = tutor_use_case
         self.quiz_use_case = quiz_use_case
         self.audio_service = audio_service
-        
-        # 🔐 Memoria volátil para el Rate Limiting (user_id: timestamp_ultimo_mensaje)
-        self._ultimas_consultas = {}
-        self._TIEMPO_MINIMO = 2.0  # Segundos mínimos entre interacciones
-
-    def _es_spammer(self, user_id: int) -> bool:
-        """🔐 Verifica si el usuario está enviando mensajes demasiado rápido."""
-        ahora = time.time()
-        ultimo_registro = self._ultimas_consultas.get(user_id, 0)
-        
-        if ahora - ultimo_registro < self._TIEMPO_MINIMO:
-            return True  # Abuso detectado
-            
-        self._ultimas_consultas[user_id] = ahora
-        return False
+        self.telegram_bot = telegram_bot
 
     async def cmd_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         rag_status = "✅ Reglamento FIA indexado" if reglamento_disponible() else "⏳ Indexando reglamento..."
@@ -74,7 +63,7 @@ class SystemController:
         texto = update.message.text
         
         # 🔐 Control de abuso (Rate Limiting)
-        if self._es_spammer(user_id):
+        if self.telegram_bot.es_spammer(user_id):
             await update.message.reply_text("⚠️ ¡Boxes llenos! Por favor, esperá unos segundos antes de enviar otro mensaje.")
             return
 
@@ -94,7 +83,7 @@ class SystemController:
                 await update.message.reply_text(respuesta[i:i + 4096])
                 
         except Exception as e:
-            logging.error(f"Error en manejar_mensaje: {e}")
+            logger.error(f"Error en manejar_mensaje: {e}")
             await update.message.reply_text("⚠️ Error técnico. Intentá de nuevo.")
 
     async def manejar_audio(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -102,7 +91,7 @@ class SystemController:
         username = update.effective_user.username
         
         # 🔐 Control de abuso en audios (son procesos pesados para la API de Whisper)
-        if self._es_spammer(user_id):
+        if self.telegram_bot.es_spammer(user_id):
             await update.message.reply_text("⚠️ ¡Boxes llenos! Esperá unos segundos antes de mandar otro audio.")
             return
 
@@ -136,7 +125,7 @@ class SystemController:
                 await update.message.reply_text(respuesta[i:i + 4096])
                 
         except Exception as e:
-            logging.error(f"Error en audio: {e}")
+            logger.error(f"Error en audio: {e}")
             await update.message.reply_text("⚠️ No pude procesar el audio.")
             
         finally:
@@ -145,4 +134,4 @@ class SystemController:
                 try:
                     os.remove(path)
                 except Exception as e:
-                    logging.error(f"No se pudo limpiar el archivo residual {path}: {e}")
+                    logger.error(f"No se pudo limpiar el archivo residual {path}: {e}")

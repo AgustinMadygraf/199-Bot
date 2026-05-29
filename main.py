@@ -1,6 +1,5 @@
 """
-main.py — Bot educativo de F1
-Punto de entrada agnóstico e inicialización general del sistema.
+Path: main.py
 """
 
 from src.infrastructure.settings.config import cargar_configuracion
@@ -21,19 +20,21 @@ from src.use_cases.tutor_use_case import TutorUseCase
 from src.presentation.race_controller import RaceController
 from src.presentation.quiz_controller import QuizController
 from src.presentation.system_controller import SystemController
+from src.infrastructure.telegram.telegram_bot import TelegramBot
 
-from src.infrastructure.telegram_bot import TelegramBot
-
-# 3. Inicialización de Componentes
+# 3. Inicialización de Componentes (Orden corregido para evitar dependencia circular)
 quiz_use_case = QuizUseCase()
 tutor_use_case = TutorUseCase()
 audio_service = AudioService()
 
-race_controller = RaceController()
-quiz_controller = QuizController(quiz_use_case)
-system_controller = SystemController(tutor_use_case, quiz_use_case, audio_service)
+# Inicializamos primero el bot, y luego el SystemController que lo necesita
+bot_service = TelegramBot(None, None, None) 
+system_controller = SystemController(tutor_use_case, quiz_use_case, audio_service, bot_service)
 
-bot_service = TelegramBot(system_controller, race_controller, quiz_controller)
+# Ahora inyectamos el controlador en el bot
+bot_service.system_controller = system_controller
+bot_service.race_controller = RaceController()
+bot_service.quiz_controller = QuizController(quiz_use_case)
 
 def main():
     # Inicialización física de recursos de datos e IA

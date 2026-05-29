@@ -1,9 +1,7 @@
-"""
-Path: src/infrastructure/telegram_bot.py
-"""
-
+# src/infrastructure/telegram/telegram_bot.py
+import time
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
-from src.infrastructure.settings.config import obtener_token_telegram
+from src.infrastructure.settings.config import obtener_token_telegram, obtener_tiempo_minimo_consulta
 from src.infrastructure.settings.logger import logger
 
 class TelegramBot:
@@ -17,6 +15,21 @@ class TelegramBot:
         self.race_controller = race_controller
         self.quiz_controller = quiz_controller
         self.app = None
+        
+        # 🔐 Memoria volátil para el Rate Limiting (user_id: timestamp_ultimo_mensaje)
+        self._ultimas_consultas = {}
+        self._TIEMPO_MINIMO = obtener_tiempo_minimo_consulta()
+
+    def es_spammer(self, user_id: int) -> bool:
+        """🔐 Verifica si el usuario está enviando mensajes demasiado rápido."""
+        ahora = time.time()
+        ultimo_registro = self._ultimas_consultas.get(user_id, 0)
+        
+        if ahora - ultimo_registro < self._TIEMPO_MINIMO:
+            return True  # Abuso detectado
+            
+        self._ultimas_consultas[user_id] = ahora
+        return False
 
     def inicializar(self):
         """Configura la aplicación y conecta los controladores de presentación."""

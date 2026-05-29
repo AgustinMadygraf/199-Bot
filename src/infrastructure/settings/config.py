@@ -1,3 +1,7 @@
+"""
+Path: src/infrastructure/settings/config.py
+"""
+
 import os
 from dotenv import load_dotenv
 
@@ -17,3 +21,7 @@ def obtener_token_telegram():
     if not token:
         raise ValueError("Falta la variable de entorno TELEGRAM_TOKEN")
     return token
+
+def obtener_tiempo_minimo_consulta():
+    """Retorna el tiempo mínimo entre consultas (Rate Limiting)."""
+    return float(os.environ.get("RATE_LIMIT_SECONDS", 2.0))
