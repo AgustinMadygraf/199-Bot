@@ -2,12 +2,14 @@
 Path: src/application/quiz_use_case.py
 """
 
+from typing import Dict, Optional
+
 from src.domain.entities.quiz import QuizSession
 from src.domain.services.shuffler import ListShuffler
 
 class QuizUseCase:
     def __init__(self, shuffler: ListShuffler):
-        self.sesiones = {}
+        self.sesiones: Dict[int, QuizSession] = {}
         self.shuffler = shuffler
 
     def iniciar_quiz(self, user_id: int, dificultad: str):
@@ -17,7 +19,7 @@ class QuizUseCase:
         return user_id in self.sesiones and not self.sesiones[user_id].pregunta_terminada
 
     def responder(self, user_id: int, respuesta: str) -> str:
-        session = self.sesiones.get(user_id)
+        session: Optional[QuizSession] = self.sesiones.get(user_id)
         if not session:
             return "No hay ninguna sesión de quiz activa."
             
@@ -32,4 +34,7 @@ class QuizUseCase:
             return f"{resultado_txt}\n\nQuiz finalizado. Puntaje: {puntaje}/{total}."
             
         proxima = session.obtener_pregunta_actual()
+        if proxima is None:
+            raise RuntimeError("No hay pregunta disponible después del procesamiento del quiz.")
+
         return f"{resultado_txt}\n\nSiguiente: {proxima['p']}\nOpciones: {', '.join(proxima['ops'])}"

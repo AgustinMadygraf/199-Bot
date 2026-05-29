@@ -1,20 +1,31 @@
 # src/infrastructure/telegram/telegram_bot.py
 import time
+from typing import Any, Optional, TYPE_CHECKING
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
 from src.infrastructure.settings.config import obtener_token_telegram, obtener_tiempo_minimo_consulta
 from src.infrastructure.settings.logger import logger
 
+if TYPE_CHECKING:
+    from src.presentation.race_controller import RaceController
+    from src.presentation.quiz_controller import QuizController
+    from src.presentation.system_controller import SystemController
+
 class TelegramBot:
     """Encapsula la infraestructura específica de Telegram para aislar el main.py."""
     
-    def __init__(self, system_controller, race_controller, quiz_controller):
+    def __init__(
+        self,
+        system_controller: Optional["SystemController"],
+        race_controller: Optional["RaceController"],
+        quiz_controller: Optional["QuizController"],
+    ):
         # El token se lee a través del módulo de configuración
         self.token = obtener_token_telegram()
             
         self.system_controller = system_controller
         self.race_controller = race_controller
         self.quiz_controller = quiz_controller
-        self.app = None
+        self.app: Optional[Any] = None
         
         # 🔐 Memoria volátil para el Rate Limiting (user_id: timestamp_ultimo_mensaje)
         self._ultimas_consultas = {}

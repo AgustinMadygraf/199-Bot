@@ -2,11 +2,11 @@
 Path: src/domain/entities/quiz.py
 """
 
-from typing import List, Dict, Optional
+from typing import Any, Dict, List, Optional
 from src.domain.services.shuffler import ListShuffler
 
 # Definición explícita de estructuras para mantener tipado seguro
-Pregunta = Dict[str, any]  # {"p": str, "ops": List[str], "r": str, "exp": str}
+Pregunta = Dict[str, Any]  # {"p": str, "ops": List[str], "r": str, "exp": str}
 
 PREGUNTAS_POOL: Dict[str, List[Pregunta]] = {
     "facil": [
