@@ -1,7 +1,4 @@
-"""
-db.py — Historial de conversaciones y métricas en SQLite
-Capa de Infraestructura: Persistencia segura y parametrizada con placeholders.
-"""
+"""Database utilities for SQLite storage in the infrastructure layer."""
 
 import sqlite3
 import json
@@ -9,11 +6,10 @@ import json
 DB_PATH = "historial.db"
 
 
-def init_db():
+def init_db() -> None:
     """Crea la base de datos y las tablas de historial y métricas si no existen."""
     con = sqlite3.connect(DB_PATH)
     with con:
-        # Tabla para la memoria a corto/mediano plazo del bot (Historial)
         con.execute("""
             CREATE TABLE IF NOT EXISTS historial (
                 user_id     INTEGER PRIMARY KEY,
@@ -21,8 +17,6 @@ def init_db():
                 actualizado TEXT    NOT NULL DEFAULT (datetime('now'))
             )
         """)
-        
-        # Tabla para auditoría y métricas locales
         con.execute("""
             CREATE TABLE IF NOT EXISTS metricas_consultas (
                 id               INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -43,13 +37,13 @@ def cargar_historial(user_id: int) -> list[dict]:
         "SELECT mensajes FROM historial WHERE user_id = ?", (user_id,)
     ).fetchone()
     con.close()
-    
+
     if row:
         return json.loads(row[0])
     return []
 
 
-def guardar_historial(user_id: int, mensajes: list[dict]):
+def guardar_historial(user_id: int, mensajes: list[dict]) -> None:
     """Guarda el historial de un usuario en la DB utilizando placeholders contra SQLi."""
     con = sqlite3.connect(DB_PATH)
     with con:
@@ -63,7 +57,7 @@ def guardar_historial(user_id: int, mensajes: list[dict]):
     con.close()
 
 
-def borrar_historial(user_id: int):
+def borrar_historial(user_id: int) -> None:
     """🔐 Privacidad (Derecho al olvido): Elimina por completo el historial del usuario."""
     con = sqlite3.connect(DB_PATH)
     with con:
@@ -71,14 +65,12 @@ def borrar_historial(user_id: int):
     con.close()
 
 
-def registrar_consulta(user_id: int, username: str, mensaje_usuario: str, tipo_respuesta: str):
+def registrar_consulta(user_id: int, username: str, mensaje_usuario: str, tipo_respuesta: str) -> None:
     """
     🔐 Registra consultas usando placeholders para blindar el sistema contra Inyección SQL.
     Aplica minimización de datos protegiendo campos nulos de privacidad.
     """
-    # Si el usuario no tiene username público configurado en Telegram, evitamos guardar NULL (None)
     username_seguro = username if username else "Anónimo"
-    
     con = sqlite3.connect(DB_PATH)
     with con:
         con.execute("""
