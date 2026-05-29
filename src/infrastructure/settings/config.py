@@ -29,6 +29,21 @@ def obtener_groq_api_key():
     return key
 
 
+def obtener_llm_provider():
+    """Retorna el proveedor de LLM (ej: 'groq', 'openai')."""
+    return os.environ.get("LLM_PROVIDER", "groq").lower()
+
+
+def obtener_llm_model():
+    """Retorna el modelo específico a utilizar."""
+    return os.environ.get("LLM_MODEL", "llama-3.3-70b-versatile")
+
+
+def obtener_llm_temperature():
+    """Retorna la temperatura para la generación del LLM."""
+    return float(os.environ.get("LLM_TEMPERATURE", 0.7))
+
+
 def obtener_openweather_api_key():
     """Retorna la API Key de OpenWeather."""
     key = os.environ.get("OPENWEATHER_API_KEY")

@@ -3,15 +3,16 @@ Path: src/application/ports/tutor_ports.py
 """
 
 from typing import Protocol, Iterable, List
-from groq.types.chat import ChatCompletionMessageParam
+from src.domain.entities.chat_message import ChatMessage
 
 class LLMClient(Protocol):
-    async def generar_respuesta(self, messages: Iterable[ChatCompletionMessageParam]) -> str:
+    async def generar_respuesta(self, messages: Iterable[ChatMessage]) -> str:
         ...
 
 class KnowledgeRepository(Protocol):
     def buscar_reglamento(self, consulta: str) -> str:
         ...
+
     async def obtener_datos_vivos(self, consulta: str) -> str:
         ...
     @property
@@ -19,7 +20,7 @@ class KnowledgeRepository(Protocol):
         ...
 
 class HistoryRepository(Protocol):
-    def cargar(self, user_id: int) -> List[ChatCompletionMessageParam]:
+    def cargar(self, user_id: int) -> List[ChatMessage]:
         ...
-    def guardar(self, user_id: int, historial: List[ChatCompletionMessageParam]) -> None:
+    def guardar(self, user_id: int, historial: List[ChatMessage]) -> None:
         ...

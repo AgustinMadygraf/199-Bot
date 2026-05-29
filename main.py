@@ -3,7 +3,13 @@ Path: main.py
 """
 
 from typing import Any, cast
-from src.infrastructure.settings.config import cargar_configuracion, obtener_groq_api_key
+from src.infrastructure.settings.config import (
+    cargar_configuracion, 
+    obtener_groq_api_key,
+    obtener_llm_provider,
+    obtener_llm_model,
+    obtener_llm_temperature
+)
 from src.infrastructure.settings.logger import setup_logging, logger
 
 # 1. Configuración de entorno y logs
@@ -32,7 +38,18 @@ shuffler = RandomShuffler()
 quiz_use_case = QuizUseCase(shuffler)
 
 # Inyección de dependencias para TutorUseCase
-llm_client = GroqLLMClient(api_key=obtener_groq_api_key())
+llm_provider = obtener_llm_provider()
+if llm_provider == "groq":
+    llm_client = GroqLLMClient(
+        api_key=obtener_groq_api_key(),
+        model=obtener_llm_model(),
+        temperature=obtener_llm_temperature()
+    )
+else:
+    # Aquí se podrían añadir otros proveedores (OpenAI, Anthropic, etc.)
+    # Por ahora lanzamos error si el provider no está soportado
+    raise ValueError(f"Proveedor de LLM no soportado: {llm_provider}")
+
 knowledge_repo = F1KnowledgeRepository()
 history_repo = DBHistoryRepository()
 tutor_use_case = TutorUseCase(llm_client, knowledge_repo, history_repo)

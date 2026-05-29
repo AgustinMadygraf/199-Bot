@@ -1,5 +1,5 @@
-from typing import List
-from groq.types.chat import ChatCompletionMessageParam
+from typing import List, Dict, Any
+from src.domain.entities.chat_message import ChatMessage
 from src.application.ports.tutor_ports import LLMClient, KnowledgeRepository, HistoryRepository
 
 class TutorUseCase:
@@ -70,16 +70,16 @@ BASE DE CONOCIMIENTO INTERNA:
 
         return self._limpiar_texto(texto_respuesta)
 
-    def _armar_contexto_contextual(self, user_id: int, mensaje_enriquecido: str) -> List[ChatCompletionMessageParam]:
+    def _armar_contexto_contextual(self, user_id: int, mensaje_enriquecido: str) -> List[ChatMessage]:
         historial = self.history_repo.cargar(user_id)
-        historial.append({"role": "user", "content": mensaje_enriquecido})
+        historial.append(ChatMessage(role="user", content=mensaje_enriquecido))
         self.history_repo.guardar(user_id, historial)
-        return [{"role": "system", "content": self.system_prompt}] + historial[-self.max_historial:]
+        return [ChatMessage(role="system", content=self.system_prompt)] + historial[-self.max_historial:]
 
-    def _guardar_asistente_en_historial(self, user_id: int, respuesta: str):
+    def _guardar_asistente_en_historial(self, user_id: int, respuesta: str) -> None:
         historial = self.history_repo.cargar(user_id)
-        historial.append({"role": "assistant", "content": respuesta})
-        self.history_repo.guardar(user_id, historial)
+        historial.append(ChatMessage(role="assistant", content=respuesta))
+        self.history_repo.guardar(user_id, historial) # This will save ChatMessage objects
 
     def _limpiar_texto(self, texto: str) -> str:
         for frase in self.frases_prohibidas:
