@@ -7,6 +7,7 @@ Docs: https://api.jolpi.ca/ergast/
 import httpx
 from datetime import datetime, timedelta, timezone
 from src.infrastructure.f1_weather import get_circuit_weather
+from src.infrastructure.settings.config import obtener_openweather_api_key
 
 BASE_URL = "https://api.jolpi.ca/ergast/f1"
 TIMEOUT = 10  # segundos
@@ -138,9 +139,10 @@ async def get_next_race() -> str:
 
     # <<< Extraemos coordenadas de Jolpica y llamamos a OpenWeather >>>
     try:
+        api_key = obtener_openweather_api_key()
         lat = c["Location"]["lat"]
         lon = c["Location"]["long"]  # Jolpica usa 'long' en sus JSON
-        clima_reporte = get_circuit_weather(lat, lon)
+        clima_reporte = get_circuit_weather(lat, lon, api_key)
     except Exception:
         clima_reporte = "⚠️ No se pudieron cargar los datos del clima."
 

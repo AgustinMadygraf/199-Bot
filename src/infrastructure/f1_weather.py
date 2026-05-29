@@ -1,12 +1,11 @@
-import os
 import requests
 
-def get_circuit_weather(lat, lon):
+
+def get_circuit_weather(lat: float, lon: float, api_key: str) -> str:
     """
     Obtiene el pronóstico del clima para las coordenadas de un circuito.
     Usa el plan gratuito de 5 días / 3 horas de OpenWeather.
     """
-    api_key = os.getenv("OPENWEATHER_API_KEY")
     if not api_key:
         return "⚠️ Error: OPENWEATHER_API_KEY no configurada en el entorno."
 
@@ -27,5 +26,5 @@ def get_circuit_weather(lat, lon):
         
         return f"🌡️ {temp}°C | 💧 Humedad: {humedad}% | 🌤️ {descripcion}"
         
-    except Exception as e:
+    except Exception:
         return "❌ No se pudo obtener el clima del circuito en este momento."

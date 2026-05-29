@@ -1,3 +1,7 @@
+"""
+Path: src/infrastructure/settings/config.py
+"""
+
 import os
 from dotenv import load_dotenv
 
@@ -8,7 +12,6 @@ def cargar_configuracion():
     # Verificación básica de variables críticas
     if not os.environ.get("TELEGRAM_TOKEN"):
         raise ValueError("La variable de entorno TELEGRAM_TOKEN no está configurada.")
-    
     return True
 
 def obtener_token_telegram():
@@ -24,6 +27,15 @@ def obtener_groq_api_key():
     if not key:
         raise ValueError("Falta la variable de entorno GROQ_API_KEY")
     return key
+
+
+def obtener_openweather_api_key():
+    """Retorna la API Key de OpenWeather."""
+    key = os.environ.get("OPENWEATHER_API_KEY")
+    if not key:
+        raise ValueError("Falta la variable de entorno OPENWEATHER_API_KEY")
+    return key
+
 
 def obtener_tiempo_minimo_consulta():
     """Retorna el tiempo mínimo entre consultas (Rate Limiting)."""
