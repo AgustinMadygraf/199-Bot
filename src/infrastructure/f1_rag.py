@@ -44,10 +44,12 @@ def _get_coleccion():
 
 def descargar_pdfs():
     """Descarga los PDFs del reglamento si no existen localmente."""
+    from src.infrastructure.settings.config import obtener_http_timeout
+
     os.makedirs(PDF_DIR, exist_ok=True)
     descargados = []
 
-    client = get_http_client()
+    client = get_http_client(obtener_http_timeout())
     for nombre, url in FIA_PDFS.items():
         ruta = os.path.join(PDF_DIR, f"{nombre}.pdf")
         if os.path.exists(ruta):

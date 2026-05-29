@@ -37,6 +37,11 @@ def obtener_openweather_api_key():
     return key
 
 
+def obtener_http_timeout():
+    """Retorna el timeout para clientes HTTP."""
+    return float(os.environ.get("HTTP_TIMEOUT_SECONDS", 30.0))
+
+
 def obtener_tiempo_minimo_consulta():
     """Retorna el tiempo mínimo entre consultas (Rate Limiting)."""
     return float(os.environ.get("RATE_LIMIT_SECONDS", 2.0))
