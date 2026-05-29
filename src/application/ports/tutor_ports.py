@@ -1,7 +1,8 @@
-from typing import Protocol, List, Dict
+from typing import Protocol, Iterable
+from groq.types.chat import ChatCompletionMessageParam
 
 class LLMClient(Protocol):
-    async def generar_respuesta(self, messages: List[Dict[str, str]]) -> str:
+    async def generar_respuesta(self, messages: Iterable[ChatCompletionMessageParam]) -> str:
         ...
 
 class KnowledgeRepository(Protocol):

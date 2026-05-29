@@ -1,4 +1,5 @@
-from typing import List, Dict
+from typing import List
+from groq.types.chat import ChatCompletionMessageParam
 from src.application.ports.tutor_ports import LLMClient, KnowledgeRepository, HistoryRepository
 
 class TutorUseCase:
@@ -69,7 +70,7 @@ BASE DE CONOCIMIENTO INTERNA:
 
         return self._limpiar_texto(texto_respuesta)
 
-    def _armar_contexto_contextual(self, user_id: int, mensaje_enriquecido: str) -> List[Dict[str, str]]:
+    def _armar_contexto_contextual(self, user_id: int, mensaje_enriquecido: str) -> List[ChatCompletionMessageParam]:
         historial = self.history_repo.cargar(user_id)
         historial.append({"role": "user", "content": mensaje_enriquecido})
         self.history_repo.guardar(user_id, historial)
