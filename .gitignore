@@ -6,3 +6,5 @@ __pycache__/
 *.sqlite3
 chroma_db/
 audio_*.ogg
+.venv/
+reglamento_pdfs/*
