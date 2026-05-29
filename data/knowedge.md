@@ -1,9 +1,3 @@
-"""
-f1_knowledge.py
-Base de conocimiento estática de F1: reglamento, circuitos, escuderías — Temporada 2026
-"""
-
-F1_STATIC_KNOWLEDGE = """
 === FÓRMULA 1 — BASE DE CONOCIMIENTO TEMPORADA 2026 ===
 
 ## NUEVA ERA 2026 — LO MÁS IMPORTANTE
@@ -20,12 +14,11 @@ el chasis, la aerodinámica y la unidad de potencia.
 
 ## NUEVA AERODINÁMICA — ACTIVE AERO
 - Se elimina el efecto suelo (ground effect) introducido en 2022
-- Los alerones delantero y trasero son ajustables (se abren y cierran)
+- Los alerones delantero y trasero son ajustables (se abren y se cierran)
 - El downforce baja entre 15% y 30%. La resistencia aerodinámica baja 40%
 - Modo Curva (Corner Mode): alerones cerrados → máxima carga en curvas
 - Modo Recta (Straight Mode): alerones abiertos → mínima resistencia en rectas
 - El piloto activa el modo desde el volante; se desactiva al frenar o soltar el acelerador
-- Con lluvia o poco grip: solo se abre el alerón delantero, no el trasero
 
 ## NUEVAS HERRAMIENTAS DE LOS PILOTOS
 - OVERTAKE MODE (Modo Adelantamiento): si el piloto está a ≤1 segundo del de adelante,
@@ -147,8 +140,10 @@ Notas:
 - Bakú: circuito urbano, recta más larga, Safety Cars frecuentes
 - Suzuka: figura en 8, muy técnico, favorito de los pilotos
 - Madrid: debut en 2026, circuito callejero urbano alrededor del IFEMA
-- Las Vegas / Singapur: nocturnos, alta temperatura de pista en Singapur
+- Las Vegas: nocturno, circuito urbano con curvas lentas y rápidas
+- Singapur: nocturno, alta temperatura de pista en Singapur
 - México: a 2.285 metros de altitud, el aire fino afecta la aerodinámica y la refrigeración
+- Imola: ya no está en el calendario 2026
 
 ## GLOSARIO TÉCNICO (conceptos para entender la F1)
 - Undercut: parar antes que el rival para sacar ventaja con neumáticos frescos
@@ -156,11 +151,11 @@ Notas:
 - Stint: período entre paradas en boxes
 - Out-lap / In-lap: vuelta de salida / entrada a boxes (neumáticos fríos)
 - Graining: daño superficial del neumático por sobreuso térmico
-- Blistering: ampollas en el neumático por temperatura excesiva
+- Blistering: ampollas en el neumático por sobreuso térmico
 - Porpoising: rebote vertical del auto (era problema del efecto suelo 2022-2024; eliminado en 2026)
 - Active Aero: sistema de alerones móviles que reemplaza al DRS en 2026
-- Overtake Mode: botón de energía extra para adelantar (reemplaza al DRS como ayuda en carrera)
-- Boost Mode: máxima potencia combinada motor+batería, para ataque o defensa
+- Overtake Mode: modo de adelantamiento basado en energía y aerodinámica
+- Boost Mode: máxima potencia eléctrica para atacar o defender
 - Super-clipping: recorte automático de potencia eléctrica a alta velocidad para ahorrar energía
 - MGU-K: Motor Generator Unit-Kinetic (recupera energía en frenada). Triplicó su poder en 2026
 - MGU-H: Motor Generator Unit-Heat — ELIMINADO en 2026
@@ -169,4 +164,3 @@ Notas:
 - Parc fermé: período sin cambios al auto (desde qualy hasta carrera)
 - VSC: Virtual Safety Car
 - Combustible sostenible: fabricado con CO2 capturado, residuos o biomasa, 0 emisiones netas
-"""
