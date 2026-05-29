@@ -1,9 +1,4 @@
-"""
-Path: src/infrastructure/adapters/tutor_adapters.py
-"""
-
 import os
-import asyncio
 from groq import Groq
 from typing import List, Dict
 from src.infrastructure.f1_knowledge import F1_STATIC_KNOWLEDGE
@@ -40,9 +35,9 @@ class F1KnowledgeRepository:
             return buscar_reglamento(consulta)
         return ""
         
-    def obtener_datos_vivos(self, consulta: str) -> str:
-        # get_relevant_f1_data es async
-        return asyncio.run(get_relevant_f1_data(consulta))
+    async def obtener_datos_vivos(self, consulta: str) -> str:
+        # Ahora correctamente asíncrono
+        return await get_relevant_f1_data(consulta)
 
 class DBHistoryRepository:
     def cargar(self, user_id: int) -> List[Dict[str, str]]:

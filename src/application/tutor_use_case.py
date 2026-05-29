@@ -1,7 +1,4 @@
-"""
-Path: src/application/tutor_use_case.py
-"""
-
+from typing import List, Dict
 from src.application.ports.tutor_ports import LLMClient, KnowledgeRepository, HistoryRepository
 
 class TutorUseCase:
@@ -53,7 +50,7 @@ BASE DE CONOCIMIENTO INTERNA:
     async def ejecutar_consulta(self, user_id: int, mensaje_usuario: str) -> str:
         """Coordina todo el flujo de recopilación de datos, llamada al LLM y limpieza de respuesta."""
         
-        datos_vivos = self.knowledge_repo.obtener_datos_vivos(mensaje_usuario)
+        datos_vivos = await self.knowledge_repo.obtener_datos_vivos(mensaje_usuario)
         datos_reglamento = self.knowledge_repo.buscar_reglamento(mensaje_usuario)
 
         extras = ""

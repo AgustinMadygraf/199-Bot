@@ -1,7 +1,3 @@
-"""
-Path: src/application/port/tutor_ports.py
-"""
-
 from typing import Protocol, List, Dict
 
 class LLMClient(Protocol):
@@ -11,7 +7,7 @@ class LLMClient(Protocol):
 class KnowledgeRepository(Protocol):
     def buscar_reglamento(self, consulta: str) -> str:
         ...
-    def obtener_datos_vivos(self, consulta: str) -> str:
+    async def obtener_datos_vivos(self, consulta: str) -> str:
         ...
     @property
     def static_knowledge(self) -> str:
