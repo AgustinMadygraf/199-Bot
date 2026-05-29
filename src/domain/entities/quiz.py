@@ -1,7 +1,5 @@
-# src/domain/quiz.py
-
-import random
 from typing import List, Dict, Optional
+from src.domain.services.shuffler import ListShuffler
 
 # Definición explícita de estructuras para mantener tipado seguro
 Pregunta = Dict[str, any]  # {"p": str, "ops": List[str], "r": str, "exp": str}
@@ -31,7 +29,7 @@ PREGUNTAS_POOL: Dict[str, List[Pregunta]] = {
         {"p": "¿Cuántos kW tiene el MGU-K en 2026?", "ops": ["120 kW", "200 kW", "350 kW", "500 kW"], "r": "C", "exp": "El MGU-K triplicó su potencia en 2026, pasando de 120 kW a 350 kW, representando ~50% de la potencia total."},
         {"p": "¿A qué velocidad el Super-Clipping recorta la potencia eléctrica?", "ops": ["250 km/h", "270 km/h", "290 km/h", "310 km/h"], "r": "C", "exp": "Por encima de 290 km/h el Super-Clipping reduce progresivamente la potencia eléctrica para ahorrar energía."},
         {"p": "¿Cuánto bajó la resistencia aerodinámica en 2026 respecto a 2025?", "ops": ["20%", "30%", "40%", "50%"], "r": "C", "exp": "La resistencia aerodinámica bajó un 40% gracias al Active Aero y el nuevo diseño del chasis."},
-        {"p": "¿Cuál es el Cost Cap en 2026?", "ops": ["$135M", "$175M", "$215M", "$250M"], "r": "C", "exp": "El Cost Cap subió a $215 millones en 2026 para cubrir los mayores costos del nuevo reglamento."},
+        {"p": "¿Cuál es el Cost Cap en 2026?", "ops": ["35M", "75M", "15M", "50M"], "r": "C", "exp": "El Cost Cap subió a 15 millones en 2026 para cubrir los mayores costos del nuevo reglamento."},
         {"p": "¿Cuántos mm menos mide el ancho del auto en 2026 vs 2025?", "ops": ["50 mm", "100 mm", "150 mm", "200 mm"], "r": "B", "exp": "Los autos 2026 son 100 mm más angostos: 1900 mm vs 2000 mm de 2025."},
         {"p": "¿Qué fabricante vuelve a la F1 en 2026 como proveedor de motores con Red Bull?", "ops": ["BMW", "Ford", "Volkswagen", "Renault"], "r": "B", "exp": "Ford vuelve a la F1 en 2026 como co-desarrollador de la unidad de potencia de Red Bull Powertrains."},
         {"p": "¿Cuántos fragmentos del reglamento FIA tiene indexados este bot?", "ops": ["1000", "1500", "2490", "3000"], "r": "C", "exp": "El bot indexó 2490 fragmentos del reglamento oficial FIA 2026 usando RAG con ChromaDB."},
@@ -41,12 +39,12 @@ PREGUNTAS_POOL: Dict[str, List[Pregunta]] = {
 
 class QuizSession:
     """Representa una sesión de Quiz activa para un usuario individual (Entidad de Dominio)"""
-    def __init__(self, dificultad: str):
+    def __init__(self, dificultad: str, shuffler: ListShuffler):
         if dificultad not in PREGUNTAS_POOL:
             raise ValueError(f"Dificultad inválida: {dificultad}")
             
         preguntas_disponibles = PREGUNTAS_POOL[dificultad].copy()
-        random.shuffle(preguntas_disponibles)
+        shuffler.shuffle(preguntas_disponibles)
         
         self.dificultad: str = dificultad
         self.preguntas: List[Pregunta] = preguntas_disponibles[:5]
