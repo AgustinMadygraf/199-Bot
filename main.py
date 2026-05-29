@@ -12,6 +12,7 @@ setup_logging()
 # 2. Importaciones de la Arquitectura
 from src.infrastructure.db import init_db, registrar_consulta
 from src.infrastructure.f1_rag import indexar_reglamento
+import src.infrastructure.f1_rag as rag_service
 from src.infrastructure.audio_service import AudioService
 from src.application.chat_processor import ChatProcessorUseCase
 from src.application.quiz_use_case import QuizUseCase
@@ -36,7 +37,7 @@ chat_processor = ChatProcessorUseCase(tutor_use_case, quiz_use_case, registrar_c
 
 # Inicializamos primero el bot, y luego el SystemController que lo necesita
 bot_service = TelegramBot(None, None, None) 
-system_controller = SystemController(audio_service, bot_service, chat_processor)
+system_controller = SystemController(audio_service, bot_service, chat_processor, rag_service)
 
 # Ahora inyectamos el controlador en el bot
 bot_service.system_controller = system_controller

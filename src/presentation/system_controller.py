@@ -6,20 +6,20 @@ import os
 import uuid
 from telegram import Update
 from telegram.ext import ContextTypes
-
+from src.infrastructure.db import borrar_historial
 from src.infrastructure.settings.logger import logger
-from src.infrastructure.f1_rag import reglamento_disponible
 
 class SystemController:
     """Controlador que maneja comandos globales, interacciones de texto y mensajería de voz con seguridad avanzada."""
     
-    def __init__(self, audio_service, telegram_bot, chat_processor):
+    def __init__(self, audio_service, telegram_bot, chat_processor, rag_service):
         self.audio_service = audio_service
         self.telegram_bot = telegram_bot
         self.chat_processor = chat_processor
+        self.rag_service = rag_service
 
     async def cmd_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        rag_status = "✅ Reglamento FIA indexado" if reglamento_disponible() else "⏳ Indexando reglamento..."
+        rag_status = "✅ Reglamento FIA indexado" if self.rag_service.reglamento_disponible() else "⏳ Indexando reglamento..."
         await update.message.reply_text(
             "🏎️ ¡Bienvenido al Bot educativo de F1!\n\n"
             "Podés preguntarme lo que quieras sobre Fórmula 1:\n"
@@ -40,7 +40,7 @@ class SystemController:
         )
 
     async def cmd_reglamento(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        if reglamento_disponible():
+        if self.rag_service.reglamento_disponible():
             await update.message.reply_text(
                 "✅ El reglamento oficial FIA 2026 está indexado y disponible.\n"
                 "Preguntame cualquier duda sobre las reglas y busco directamente en el documento oficial."
@@ -51,7 +51,6 @@ class SystemController:
             )
 
     async def cmd_reset(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        from src.infrastructure.db import borrar_historial
         borrar_historial(update.effective_user.id)
         await update.message.reply_text("✅ Historial borrado. ¡Volvemos a la largada!")
 
