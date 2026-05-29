@@ -14,16 +14,23 @@ from src.infrastructure.db import init_db, registrar_consulta
 from src.infrastructure.f1_rag import indexar_reglamento
 from src.infrastructure.audio_service import AudioService
 from src.application.chat_processor import ChatProcessorUseCase
-from src.use_cases.quiz_use_case import QuizUseCase
-from src.use_cases.tutor_use_case import TutorUseCase
+from src.application.quiz_use_case import QuizUseCase
+from src.application.tutor_use_case import TutorUseCase
 from src.presentation.race_controller import RaceController
 from src.presentation.quiz_controller import QuizController
 from src.presentation.system_controller import SystemController
 from src.infrastructure.telegram.telegram_bot import TelegramBot
+from src.infrastructure.adapters.tutor_adapters import GroqLLMClient, F1KnowledgeRepository, DBHistoryRepository
 
 # 3. Inicialización de Componentes
 quiz_use_case = QuizUseCase()
-tutor_use_case = TutorUseCase()
+
+# Inyección de dependencias para TutorUseCase
+llm_client = GroqLLMClient()
+knowledge_repo = F1KnowledgeRepository()
+history_repo = DBHistoryRepository()
+tutor_use_case = TutorUseCase(llm_client, knowledge_repo, history_repo)
+
 audio_service = AudioService()
 chat_processor = ChatProcessorUseCase(tutor_use_case, quiz_use_case, registrar_consulta)
 

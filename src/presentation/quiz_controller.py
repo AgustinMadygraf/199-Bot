@@ -1,7 +1,10 @@
-# src/presentation/quiz_controller.py
+"""
+Path: src/presentation/quiz_controller.py
+"""
+
 from telegram import Update
 from telegram.ext import ContextTypes
-from src.use_cases.quiz_use_case import QuizUseCase
+from src.application.quiz_use_case import QuizUseCase
 
 class QuizController:
     """Controlador que maneja la interacción de comandos de la Trivia con Telegram."""

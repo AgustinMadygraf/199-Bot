@@ -1,4 +1,6 @@
-# src/use_cases/quiz_use_case.py
+"""
+Path: src/application/quiz_use_case.py
+"""
 
 from typing import Dict
 from src.domain.quiz import QuizSession
