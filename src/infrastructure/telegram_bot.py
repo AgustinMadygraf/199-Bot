@@ -1,16 +1,17 @@
-# src/infrastructure/telegram_bot.py
-import os
-import logging
+"""
+Path: src/infrastructure/telegram_bot.py
+"""
+
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+from src.infrastructure.settings.config import obtener_token_telegram
+from src.infrastructure.settings.logger import logger
 
 class TelegramBot:
     """Encapsula la infraestructura específica de Telegram para aislar el main.py."""
     
     def __init__(self, system_controller, race_controller, quiz_controller):
-        # El token se lee ACÁ, donde pertenece (Infraestructura de Telegram)
-        self.token = os.environ.get("TELEGRAM_TOKEN")
-        if not self.token:
-            raise ValueError("Falta la variable de entorno TELEGRAM_TOKEN")
+        # El token se lee a través del módulo de configuración
+        self.token = obtener_token_telegram()
             
         self.system_controller = system_controller
         self.race_controller = race_controller
@@ -46,5 +47,5 @@ class TelegramBot:
         """Lanza el bot en modo polling."""
         if not self.app:
             self.inicializar()
-        logging.info("🏎️ Bot de Telegram iniciado y escuchando...")
+        logger.info("🏎️ Bot de Telegram iniciado y escuchando...")
         self.app.run_polling()
