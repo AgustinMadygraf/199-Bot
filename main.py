@@ -21,11 +21,12 @@ from src.presentation.race_controller import RaceController
 from src.presentation.quiz_controller import QuizController
 from src.presentation.system_controller import SystemController
 from src.infrastructure.telegram.telegram_bot import TelegramBot
-from src.infrastructure.adapters.tutor_adapters import GroqLLMClient, F1KnowledgeRepository, DBHistoryRepository
-from src.infrastructure.random.shuffler_adapter import RandomShuffler
+from src.infrastructure.llm.groq_client import GroqLLMClient
+from src.infrastructure.f1.knowledge_repository import F1KnowledgeRepository
+from src.infrastructure.db.history_repository import DBHistoryRepository
+from src.infrastructure.adapters.shuffler_adapter import RandomShuffler
 
 # 3. Inicialización de Componentes
-# Inyección de dependencias para QuizUseCase
 shuffler = RandomShuffler()
 quiz_use_case = QuizUseCase(shuffler)
 

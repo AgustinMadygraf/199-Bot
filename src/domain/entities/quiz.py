@@ -1,3 +1,7 @@
+"""
+Path: src/domain/entities/quiz.py
+"""
+
 from typing import List, Dict, Optional
 from src.domain.services.shuffler import ListShuffler
 

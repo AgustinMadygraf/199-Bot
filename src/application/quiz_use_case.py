@@ -1,3 +1,7 @@
+"""
+Path: src/application/quiz_use_case.py
+"""
+
 from src.domain.entities.quiz import QuizSession
 from src.domain.services.shuffler import ListShuffler
 
