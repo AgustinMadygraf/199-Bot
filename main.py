@@ -1,4 +1,7 @@
-from typing import Any, cast
+"""
+Path: main.py
+"""
+
 from src.infrastructure.settings.config import (
     cargar_configuracion, 
     obtener_groq_api_key,
@@ -8,11 +11,9 @@ from src.infrastructure.settings.config import (
 )
 from src.infrastructure.settings.logger import setup_logging, logger
 
-# 1. Configuración de entorno y logs
 cargar_configuracion()
 setup_logging()
 
-# 2. Importaciones de la Arquitectura
 from src.infrastructure.db.sqlite_handler import init_db
 from src.infrastructure.db.metrics_repository import SQLiteMetricsRepository
 from src.infrastructure.db.history_repository import SQLiteHistoryRepository
@@ -23,7 +24,7 @@ from src.application.quiz_use_case import QuizUseCase
 from src.application.tutor_use_case import TutorUseCase
 from src.presentation.race_controller import RaceController
 from src.infrastructure.f1_api_gateway import F1ApiGateway
-from src.presentation.quiz_controller import QuizController
+from src.interface_adapters.controllers.quiz_controller import QuizController
 from src.presentation.presenters.quiz_presenter import QuizPresenter
 from src.presentation.system_controller import SystemController
 from src.infrastructure.telegram.telegram_bot import TelegramBot
@@ -39,7 +40,6 @@ from src.infrastructure.chroma_db_repository import ChromaDBRepository
 from src.infrastructure.pdf_service import PDFService
 from src.infrastructure.rag_indexer import RAGIndexer
 
-# 3. Inicialización de Componentes
 shuffler = RandomShuffler()
 f1_gateway = F1ApiGateway()
 chroma_repo = ChromaDBRepository()
@@ -49,7 +49,6 @@ quiz_repo = JsonQuizRepository(data_path="data/quiz/preguntas.json")
 quiz_presenter = QuizPresenter()
 quiz_use_case = QuizUseCase(shuffler, quiz_repo)
 
-# Inyección de dependencias para TutorUseCase
 llm_provider = obtener_llm_provider()
 if llm_provider == "groq":
     llm_client = GroqLLMClient(
@@ -69,18 +68,27 @@ audio_service = AudioService()
 audio_use_case = AudioUseCase(audio_service)
 chat_processor = ChatProcessorUseCase(tutor_use_case, quiz_use_case, SQLiteMetricsRepository())
 
-# Registro de controladores
 registry = ControllerRegistry()
-system_controller = SystemController(audio_use_case, None, chat_processor, None, history_repo)
+
+quiz_controller = QuizController(quiz_use_case, quiz_presenter)
+
+system_controller = SystemController(
+    audio_use_case=audio_use_case, 
+    telegram_bot=None, 
+    chat_processor=chat_processor, 
+    rag_service=indexer, 
+    history_repository=history_repo,
+    quiz_controller=quiz_controller
+)
+
 registry.register("system", system_controller)
 registry.register("race", RaceController(f1_gateway))
-registry.register("quiz", QuizController(quiz_use_case, quiz_presenter))
+registry.register("quiz", quiz_controller)
 
 # Inicializamos el bot con el registry
 bot_service = TelegramBot(registry)
 
-# Ahora inyectamos el controlador en el bot (si es necesario actualizar el SystemController)
-system_controller.bot = bot_service
+system_controller.telegram_bot = bot_service
 
 def main():
     init_db()

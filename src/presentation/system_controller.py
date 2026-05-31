@@ -6,17 +6,18 @@ from src.application.audio_use_case import AudioUseCase
 from src.application.ports.tutor_ports import HistoryRepository
 
 class SystemController:
-    """Controlador que maneja comandos globales, interacciones de texto y mensajería de voz con seguridad avanzada."""
+    """Controlador que maneja comandos globales, interacciones de texto y mensajería de voz."""
     
-    def __init__(self, audio_use_case: AudioUseCase, telegram_bot, chat_processor, rag_service, history_repository: HistoryRepository):
+    def __init__(self, audio_use_case: AudioUseCase, telegram_bot, chat_processor, rag_service, history_repository: HistoryRepository, quiz_controller=None):
         self.audio_use_case = audio_use_case
         self.telegram_bot = telegram_bot
         self.chat_processor = chat_processor
         self.rag_service = rag_service
         self.history_repository = history_repository
+        self.quiz_controller = quiz_controller
 
     async def cmd_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        rag_status = "✅ Reglamento FIA indexado" if self.rag_service.reglamento_disponible() else "⏳ Indexando reglamento..."
+        rag_status = "✅ Reglamento FIA indexado" if self.rag_service and self.rag_service.reglamento_disponible() else "⏳ Reglamento no disponible"
         await update.message.reply_text(
             "🏎️ ¡Bienvenido al Bot educativo de F1!\n\n"
             "Podés preguntarme lo que quieras sobre Fórmula 1:\n"
@@ -37,14 +38,14 @@ class SystemController:
         )
 
     async def cmd_reglamento(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        if self.rag_service.reglamento_disponible():
+        if self.rag_service and self.rag_service.reglamento_disponible():
             await update.message.reply_text(
                 "✅ El reglamento oficial FIA 2026 está indexado y disponible.\n"
                 "Preguntame cualquier duda sobre las reglas y busco directamente en el documento oficial."
             )
         else:
             await update.message.reply_text(
-                "⏳ El reglamento todavía se está indexando. Intentá de nuevo en unos minutos."
+                "⏳ El reglamento todavía se está indexando o no está disponible. Intentá de nuevo en unos minutos."
             )
 
     async def cmd_reset(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -56,14 +57,14 @@ class SystemController:
         username = update.effective_user.username
         texto = update.message.text
         
-        if self.telegram_bot.es_spammer(user_id):
-            await update.message.reply_text("⚠️ ¡Boxes llenos! Por favor, esperá unos segundos antes de enviar otro mensaje.")
-            return
-
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
         
         try:
-            respuesta = await self.chat_processor.procesar(user_id, username, texto, "consulta_general")
+            # Si el usuario está en un quiz, derivamos la respuesta al QuizController
+            if self.quiz_controller and self.quiz_controller.quiz_use_case.esta_jugando(user_id):
+                respuesta = await self.quiz_controller.responder(user_id, texto)
+            else:
+                respuesta = await self.chat_processor.procesar(user_id, username, texto, "consulta_general")
             
             for i in range(0, len(respuesta), 4096):
                 await update.message.reply_text(respuesta[i:i + 4096])
@@ -76,30 +77,24 @@ class SystemController:
         user_id = update.effective_user.id
         username = update.effective_user.username
         
-        if self.telegram_bot.es_spammer(user_id):
-            await update.message.reply_text("⚠️ ¡Boxes llenos! Esperá unos segundos antes de mandar otro audio.")
-            return
-
-        await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+        await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="record_voice")
         
         try:
-            voice = update.message.voice or update.message.audio
-            file = await context.bot.get_file(voice.file_id)
+            archivo_voz = await context.bot.get_file(update.message.voice.file_id)
+            texto_transcrito = await self.audio_use_case.transcribir(archivo_voz.file_path)
             
-            id_unico = uuid.uuid4().hex[:6]
-            path = f"audio_{user_id}_{id_unico}.ogg"
-            
-            await file.download_to_drive(path)
-            
-            texto = await self.audio_use_case.transcribir(path)
-            
-            await update.message.reply_text(f"🎙️ Escuché: _{texto}_", parse_mode="Markdown")
-            
-            respuesta = await self.chat_processor.procesar(user_id, username, texto, "consulta_general_audio")
-            
-            for i in range(0, len(respuesta), 4096):
-                await update.message.reply_text(respuesta[i:i + 4096])
-                
+            if not texto_transcrito:
+                await update.message.reply_text("No pude entender el audio. ¿Podés repetir?")
+                return
+
+            # Procesar el texto transcrito (igual que un mensaje de texto)
+            if self.quiz_controller and self.quiz_controller.quiz_use_case.esta_jugando(user_id):
+                respuesta = await self.quiz_controller.responder(user_id, texto_transcrito)
+            else:
+                respuesta = await self.chat_processor.procesar(user_id, username, texto_transcrito, "consulta_voz")
+
+            await update.message.reply_text(f"🎤 *Entendido:* _{texto_transcrito}_\n\n{respuesta}", parse_mode="Markdown")
+
         except Exception as e:
-            logger.error(f"Error en audio: {e}")
-            await update.message.reply_text("⚠️ No pude procesar el audio.")
+            logger.error(f"Error en manejar_audio: {e}")
+            await update.message.reply_text("⚠️ Error al procesar el audio.")
