@@ -1,3 +1,7 @@
+"""
+Path: main.py
+"""
+
 from src.infrastructure.settings.config import (
     cargar_configuracion, 
     obtener_groq_api_key,
@@ -24,7 +28,9 @@ from src.presentation.presenters.f1_presenter import F1Presenter
 from src.infrastructure.f1_api_gateway import F1ApiGateway
 from src.interface_adapters.controllers.quiz_controller import QuizController
 from src.presentation.presenters.quiz_presenter import QuizPresenter
-from src.presentation.system_controller import SystemController
+from src.application.message_orchestrator import MessageOrchestrator
+from src.interface_adapters.controllers.command_controller import CommandController
+from src.interface_adapters.controllers.message_controller import MessageController
 from src.infrastructure.telegram.telegram_bot import TelegramBot
 from src.infrastructure.telegram.controller_registry import ControllerRegistry
 from src.infrastructure.llm.groq_client import GroqLLMClient
@@ -72,24 +78,18 @@ quiz_controller = QuizController(quiz_use_case, quiz_presenter)
 f1_use_case = F1UseCase(f1_gateway)
 f1_presenter = F1Presenter()
 f1_controller = F1Controller(f1_use_case, f1_presenter)
+message_orchestrator = MessageOrchestrator(chat_processor, quiz_controller)
+command_controller = CommandController(indexer, history_repo)
+message_controller = MessageController(message_orchestrator, audio_use_case)
 
-system_controller = SystemController(
-    audio_use_case=audio_use_case, 
-    telegram_bot=None, 
-    chat_processor=chat_processor, 
-    rag_service=indexer, 
-    history_repository=history_repo,
-    quiz_controller=quiz_controller
-)
 
-registry.register("system", system_controller)
+registry.register("command", command_controller)
+registry.register("message", message_controller)
 registry.register("race", f1_controller)
 registry.register("quiz", quiz_controller)
 
 # Inicializamos el bot con el registry
 bot_service = TelegramBot(registry)
-
-system_controller.telegram_bot = bot_service
 
 def main():
     init_db()

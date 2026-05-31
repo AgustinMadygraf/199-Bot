@@ -84,7 +84,7 @@ Este bot fue diseñado siguiendo los principios de **Arquitectura Limpia (Clean 
 El proyecto se divide en tres capas fundamentales que respetan la regla de dependencia hacia el interior:
 
 1. **Capa de Presentación (`src/presentation/`):** 
-    Contiene los controladores (`RaceController`, `QuizController`, `SystemController`) encargados de recibir los estímulos de la interfaz de usuario y formatear las respuestas. No manejan lógica de negocio ni llamadas directas a APIs de datos.
+    Contiene los controladores (`F1Controller`, `QuizController`, `CommandController`, `MessageController`) encargados de recibir los estímulos de la interfaz de usuario y formatear las respuestas. No manejan lógica de negocio ni llamadas directas a APIs de datos.
    
 2. **Capa de Casos de Uso / Negocio (`src/use_cases/`):**
    Es el núcleo de la aplicación. Aquí residen las reglas puras del sistema (`TutorUseCase` y `QuizUseCase`), como el procesamiento de consultas educativas o las mecánicas del juego de trivia. Esta capa es 100% reutilizable si el bot se migra a Discord, WhatsApp o una plataforma web.
