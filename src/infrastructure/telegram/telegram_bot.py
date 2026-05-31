@@ -2,7 +2,7 @@
 Path: src/infrastructure/telegram/telegram_bot.py
 """
 
-from typing import Any, Optional
+from typing import Any, Optional, Callable, Awaitable
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder, 
@@ -19,27 +19,20 @@ from src.infrastructure.telegram.rate_limiter import RateLimiter
 from src.infrastructure.telegram.controller_registry import ControllerRegistry
 
 class TelegramBot:
-    """Encapsula la infraestructura específica de Telegram para aislar el main.py."""
-    
+
     def __init__(self, registry: ControllerRegistry):
         self.token = obtener_token_telegram()
         self.registry = registry
-        # Application es genérico en python-telegram-bot v20+, se añaden Any para satisfacer Pylance
         self.app: Optional[Application[Any, Any, Any, Any, Any, Any]] = None
         self.rate_limiter = RateLimiter()
 
     def inicializar(self):
-        """Configura la aplicación y conecta los controladores registrados con el middleware."""
-        # Al construir la app, también se puede especificar el tipo si es necesario, 
-        # pero ApplicationBuilder().build() devuelve una Application configurada.
         self.app = ApplicationBuilder().token(self.token).build()
 
         system_ctrl = self.registry.get("system")
-        race_ctrl = self.registry.get("race")
+        f1_ctrl = self.registry.get("race")
         quiz_ctrl = self.registry.get("quiz")
 
-        # Helper para añadir handlers con middleware
-        # BaseHandler requiere 3 argumentos de tipo en v20+
         def add_handler_with_limit(handler: BaseHandler[Any, Any, Any]):
             original_callback = handler.callback
             async def wrapped_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -55,17 +48,21 @@ class TelegramBot:
             if self.app:
                 self.app.add_handler(handler)
 
-        # Rutas registradas
+        async def f1_handler_wrapper(update: Update, context: ContextTypes.DEFAULT_TYPE, controller_method: Callable[[], Awaitable[str]]):
+            if not update.message or not update.effective_chat: return
+            await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
+            response = await controller_method()
+            await update.message.reply_text(response)
+
         add_handler_with_limit(CommandHandler("start",      system_ctrl.cmd_start))
         add_handler_with_limit(CommandHandler("reglamento", system_ctrl.cmd_reglamento))
         add_handler_with_limit(CommandHandler("reset",      system_ctrl.cmd_reset))
         
-        add_handler_with_limit(CommandHandler("standings",    race_ctrl.cmd_standings))
-        add_handler_with_limit(CommandHandler("constructors", race_ctrl.cmd_constructors))
-        add_handler_with_limit(CommandHandler("lastrace",     race_ctrl.cmd_lastrace))
-        add_handler_with_limit(CommandHandler("nextrace",     race_ctrl.cmd_nextrace))
+        add_handler_with_limit(CommandHandler("standings",    lambda u, c: f1_handler_wrapper(u, c, f1_ctrl.cmd_standings)))
+        add_handler_with_limit(CommandHandler("constructors", lambda u, c: f1_handler_wrapper(u, c, f1_ctrl.cmd_constructors)))
+        add_handler_with_limit(CommandHandler("lastrace",     lambda u, c: f1_handler_wrapper(u, c, f1_ctrl.cmd_lastrace)))
+        add_handler_with_limit(CommandHandler("nextrace",     lambda u, c: f1_handler_wrapper(u, c, f1_ctrl.cmd_nextrace)))
         
-        # Adaptadores para QuizController (ahora desacoplado)
         async def quiz_cmd_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if update.message:
                 await update.message.reply_text(await quiz_ctrl.cmd_quiz())
@@ -94,5 +91,4 @@ class TelegramBot:
         if not self.app:
             self.inicializar()
         if self.app:
-            logger.info("🏎️ Bot de Telegram iniciado y escuchando...")
             self.app.run_polling()

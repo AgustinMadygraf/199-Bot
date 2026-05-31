@@ -1,13 +1,15 @@
+"""
+Path: src/presentation/system_controller.py
+"""
+
 from telegram import Update
 from telegram.ext import ContextTypes
-import uuid
 from src.infrastructure.settings.logger import logger
 from src.application.audio_use_case import AudioUseCase
 from src.application.ports.tutor_ports import HistoryRepository
 
 class SystemController:
-    """Controlador que maneja comandos globales, interacciones de texto y mensajería de voz."""
-    
+
     def __init__(self, audio_use_case: AudioUseCase, telegram_bot, chat_processor, rag_service, history_repository: HistoryRepository, quiz_controller=None):
         self.audio_use_case = audio_use_case
         self.telegram_bot = telegram_bot

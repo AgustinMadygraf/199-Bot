@@ -1,7 +1,3 @@
-"""
-Path: main.py
-"""
-
 from src.infrastructure.settings.config import (
     cargar_configuracion, 
     obtener_groq_api_key,
@@ -22,7 +18,9 @@ from src.application.audio_use_case import AudioUseCase
 from src.application.chat_processor import ChatProcessorUseCase
 from src.application.quiz_use_case import QuizUseCase
 from src.application.tutor_use_case import TutorUseCase
-from src.presentation.race_controller import RaceController
+from src.application.f1_use_case import F1UseCase
+from src.interface_adapters.controllers.f1_controller import F1Controller
+from src.presentation.presenters.f1_presenter import F1Presenter
 from src.infrastructure.f1_api_gateway import F1ApiGateway
 from src.interface_adapters.controllers.quiz_controller import QuizController
 from src.presentation.presenters.quiz_presenter import QuizPresenter
@@ -71,6 +69,9 @@ chat_processor = ChatProcessorUseCase(tutor_use_case, quiz_use_case, SQLiteMetri
 registry = ControllerRegistry()
 
 quiz_controller = QuizController(quiz_use_case, quiz_presenter)
+f1_use_case = F1UseCase(f1_gateway)
+f1_presenter = F1Presenter()
+f1_controller = F1Controller(f1_use_case, f1_presenter)
 
 system_controller = SystemController(
     audio_use_case=audio_use_case, 
@@ -82,7 +83,7 @@ system_controller = SystemController(
 )
 
 registry.register("system", system_controller)
-registry.register("race", RaceController(f1_gateway))
+registry.register("race", f1_controller)
 registry.register("quiz", quiz_controller)
 
 # Inicializamos el bot con el registry
