@@ -3,20 +3,17 @@ Path: src/interface_adapters/controllers/command_controller.py
 """
 
 from src.application.ports.tutor_ports import HistoryRepository
-from src.infrastructure.rag_indexer import RAGIndexer
+from src.application.ports.knowledge_status_port import KnowledgeStatusPort
 
 class CommandController:
-    rag_service: RAGIndexer
-    history_repository: HistoryRepository
-
-    def __init__(self, rag_service: RAGIndexer, history_repository: HistoryRepository):
-        self.rag_service = rag_service
+    def __init__(self, knowledge_status: KnowledgeStatusPort, history_repository: HistoryRepository):
+        self.knowledge_status = knowledge_status
         self.history_repository = history_repository
 
     def get_start_message(self) -> str:
         try:
-            rag_count = self.rag_service.repository.count()
-            rag_status = "✅ Reglamento FIA 2026 indexado" if rag_count > 0 else "⏳ Reglamento no disponible"
+            count = self.knowledge_status.count_documents()
+            rag_status = "✅ Reglamento FIA 2026 indexado" if count > 0 else "⏳ Reglamento no disponible"
         except Exception:
             rag_status = "⚠️ Error al verificar base de conocimientos"
 
