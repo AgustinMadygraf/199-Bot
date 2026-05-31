@@ -40,7 +40,6 @@ from src.infrastructure.f1_rag_gateway import F1RagGateway
 from src.infrastructure.f1_live_knowledge_gateway import F1LiveKnowledgeGateway
 from src.infrastructure.random.shuffler_adapter import RandomShuffler
 from src.infrastructure.quiz.json_quiz_repository import JsonQuizRepository
-from src.infrastructure.chroma_db_status_adapter import ChromaDBStatusAdapter
 from src.infrastructure.db.chroma_vector_repository import ChromaVectorRepository
 from src.infrastructure.embeddings.sentence_transformer_service import SentenceTransformerService
 from src.infrastructure.pdf_service import PDFService
@@ -52,7 +51,6 @@ embedding_service = SentenceTransformerService()
 chroma_repo = ChromaVectorRepository(embedding_service)
 pdf_service = PDFService()
 indexer = RAGIndexer(chroma_repo, pdf_service)
-chroma_status_adapter = ChromaDBStatusAdapter(chroma_repo)
 quiz_repo = JsonQuizRepository(data_path="data/quiz/preguntas.json")
 quiz_formatter = QuizFormatter()
 quiz_use_case = QuizUseCase(shuffler, quiz_repo)
@@ -83,7 +81,7 @@ f1_use_case = F1UseCase(f1_gateway)
 f1_formatter = F1Formatter()
 f1_controller = F1Controller(f1_use_case, f1_formatter)
 message_orchestrator = MessageOrchestrator(chat_processor, quiz_controller)
-command_controller = CommandController(chroma_status_adapter, history_repo)
+command_controller = CommandController(chroma_repo, history_repo)
 message_controller = MessageController(message_orchestrator, audio_use_case)
 
 

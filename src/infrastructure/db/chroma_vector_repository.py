@@ -18,6 +18,9 @@ class ChromaVectorRepository:
     def count(self) -> int:
         return self.coleccion.count()
 
+    def count_documents(self) -> int:
+        return self.count()
+
     def add_texts(self, textos: List[str], metadatos: List[Dict], ids: List[str]):
         embeds = self.embedding_gateway.embed_texts(textos)
         self.coleccion.add(documents=textos, embeddings=embeds, ids=ids, metadatas=metadatos)
