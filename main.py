@@ -20,8 +20,6 @@ setup_logging()
 from src.infrastructure.db.sqlite_handler import init_db
 from src.infrastructure.db.metrics_repository import SQLiteMetricsRepository
 from src.infrastructure.db.history_repository import SQLiteHistoryRepository
-from src.infrastructure.f1_rag import indexar_reglamento
-import src.infrastructure.f1_rag as rag_service
 from src.infrastructure.audio_service import AudioService
 from src.application.audio_use_case import AudioUseCase
 from src.application.chat_processor import ChatProcessorUseCase
@@ -37,10 +35,12 @@ from src.infrastructure.f1.knowledge_repository import F1KnowledgeRepository
 from src.infrastructure.f1_rag_gateway import F1RagGateway
 from src.infrastructure.f1_live_knowledge_gateway import F1LiveKnowledgeGateway
 from src.infrastructure.random.shuffler_adapter import RandomShuffler
+from src.infrastructure.chroma_db_repository import ChromaDBRepository
 
 # 3. Inicialización de Componentes
 shuffler = RandomShuffler()
 f1_gateway = F1ApiGateway()
+chroma_repo = ChromaDBRepository()
 quiz_use_case = QuizUseCase(shuffler)
 
 # Inyección de dependencias para TutorUseCase
@@ -52,11 +52,9 @@ if llm_provider == "groq":
         temperature=obtener_llm_temperature()
     )
 else:
-    # Aquí se podrían añadir otros proveedores (OpenAI, Anthropic, etc.)
-    # Por ahora lanzamos error si el provider no está soportado
     raise ValueError(f"Proveedor de LLM no soportado: {llm_provider}")
 
-knowledge_repo = F1KnowledgeRepository(F1RagGateway(), F1LiveKnowledgeGateway(f1_gateway))
+knowledge_repo = F1KnowledgeRepository(F1RagGateway(chroma_repo), F1LiveKnowledgeGateway(f1_gateway))
 history_repo = SQLiteHistoryRepository()
 tutor_use_case = TutorUseCase(llm_client, knowledge_repo, history_repo)
 
@@ -66,12 +64,11 @@ chat_processor = ChatProcessorUseCase(tutor_use_case, quiz_use_case, SQLiteMetri
 
 # Inicializamos primero el bot, y luego el SystemController que lo necesita
 bot_service = TelegramBot(None, None, None) 
-system_controller = SystemController(audio_use_case, bot_service, chat_processor, rag_service, history_repo)
+system_controller = SystemController(audio_use_case, bot_service, chat_processor, None, history_repo)
 
 # Ahora inyectamos el controlador en el bot
 # Bypass static type restrictions on attribute assignment when wiring controllers
 cast(Any, bot_service).system_controller = system_controller
-bot_service.race_controller = RaceController(f1_gateway)
 bot_service.race_controller = RaceController(f1_gateway)
 bot_service.quiz_controller = QuizController(quiz_use_case)
 
@@ -79,10 +76,10 @@ def main():
     # Inicialización física de recursos de datos e IA
     init_db()
     
-    logger.info("📚 Indexando reglamento FIA 2026 y preparando sistema...")
-    # Esto indexa los PDFs de la carpeta 'reglamento_pdfs'
-    indexar_reglamento()
-
+    logger.info("📚 Preparando sistema...")
+    # El indexado ahora se maneja de otra forma, si es necesario.
+    # Por ahora dejamos este placeholder.
+    
     # Encender el bot
     logger.info("🚀 Motor encendido: F1 Tutor Bot listo en Telegram.")
     bot_service.encender()
