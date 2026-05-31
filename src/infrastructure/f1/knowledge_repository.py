@@ -1,3 +1,7 @@
+"""
+Path: src/infrastructure/f1/knowledge_repository.py
+"""
+
 from pathlib import Path
 from src.application.ports.rag_gateway import RagGateway
 from src.application.ports.live_knowledge_gateway import LiveKnowledgeGateway

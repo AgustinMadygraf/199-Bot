@@ -1,3 +1,7 @@
+"""
+Path: src/application/ports/rag_gateway.py
+"""
+
 from typing import Protocol
 
 class RagGateway(Protocol):

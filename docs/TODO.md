@@ -7,12 +7,15 @@
 - [x] Implementar AudioUseCase como boundary.
 - [x] Refactorizar capa de persistencia (mover a sqlite_handler.py y vaciar __init__.py).
 
-## Fase 2: Mejora de la Capa de Infraestructura (En progreso)
-- [ ] Refactorizar sqlite_handler.py de procedimental a orientado a objetos (Implementar HistoryRepository formalmente).
+## Fase 2: Mejora de la Capa de Infraestructura (Completado)
+- [x] Refactorizar sqlite_handler.py de procedimental a orientado a objetos (Implementar HistoryRepository formalmente).
 - [x] Segregar responsabilidades: Mover registrar_consulta (métricas) a un MetricsRepository separado.
-- [ ] Definir e implementar estrategia de testing para Infraestructura (base de datos en memoria).
+- [x] Definir e implementar estrategia de testing para Infraestructura (base de datos en memoria).
 
-## Fase 3: Refactorización Final y Testing (Pendiente)
-- [ ] Extract get_circuit_weather into a WeatherGateway.
+## Fase 3: Refactorización Final y Testing (En progreso)
+- [ ] Auditoría de dependencias: Identificar todos los usos de `src/infrastructure/f1_api.py`.
+- [ ] Implementar Presenters para formateo de datos de F1.
+- [ ] Migrar lógica de negocio y llamadas a API de `f1_api.py` a nuevos Gateways/Presenters.
+- [ ] Eliminar legado (`src/infrastructure/f1_api.py`).
+- [x] Extract get_circuit_weather into a WeatherGateway.
 - [ ] Implementar pruebas unitarias completas con Mocks para todos los Gateways y Use Cases.
-- [ ] Eliminar legado (src/infrastructure/f1_api.py).
