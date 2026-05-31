@@ -1,21 +1,19 @@
-# Roadmap 199-Bot Refactor
+# Plan de Acción: Refactorización TutorUseCase
 
-## Fase 1: Arquitectura Limpia y Desacoplamiento (Completado)
-- [x] Definir Entidades de Dominio y Puertos.
-- [x] Implementar Gateways (API, RAG, LiveKnowledge).
-- [x] Refactorizar SystemController (eliminando dependencia directa de infraestructura).
-- [x] Implementar AudioUseCase como boundary.
-- [x] Refactorizar capa de persistencia (mover a sqlite_handler.py y vaciar __init__.py).
+## Prioridad Alta: Desacoplamiento de Datos
+- [x] **Crear Puerto de Prompts:** Definir `PromptRepository` en `src/application/ports/tutor_ports.py` para abstraer la obtención de plantillas de IA.
+- [x] **Extraer System Prompt:** Mover el texto del prompt de `TutorUseCase.py` a un archivo Markdown en `data/prompts/tutor_system.md`.
+- [x] **Implementar Adaptador de Archivos:** Crear `FilePromptRepository` en infraestructura para leer los archivos `.md`.
+- [x] **Externalizar Filtros:** Mover la lista de `frases_prohibidas` a un archivo `JSON` o `YAML` en `data/config/`.
 
-## Fase 2: Mejora de la Capa de Infraestructura (Completado)
-- [x] Refactorizar sqlite_handler.py de procedimental a orientado a objetos (Implementar HistoryRepository formalmente).
-- [x] Segregar responsabilidades: Mover registrar_consulta (métricas) a un MetricsRepository separado.
-- [x] Definir e implementar estrategia de testing para Infraestructura (base de datos en memoria).
+## Prioridad Media: Refactorización de Lógica
+- [x] **Limpieza de TutorUseCase:** Inyectar el nuevo puerto en el constructor y eliminar todos los strings hardcodeados.
+- [x] **Generación Dinámica:** Cambiar la construcción del prompt para que se realice en cada consulta (o mediante un método `get_prompt()`), asegurando que tome los datos más recientes del repositorio de conocimiento.
+- [ ] **Domain Service de Limpieza:** Considerar mover la lógica de `_limpiar_texto` a un servicio de dominio si las reglas se vuelven más complejas.
 
-## Fase 3: Refactorización Final y Testing (En progreso)
-- [ ] Auditoría de dependencias: Identificar todos los usos de `src/infrastructure/f1_api.py`.
-- [ ] Implementar Presenters para formateo de datos de F1.
-- [x] Migrar lógica de negocio y llamadas a API de `f1_api.py` a nuevos Gateways/Presenters.
-- [x] Eliminar legado (`src/infrastructure/f1_api.py`).
-- [x] Extract get_circuit_weather into a WeatherGateway.
-- [ ] Implementar pruebas unitarias completas con Mocks para todos los Gateways y Use Cases.
+## Prioridad Baja: Calidad y Extensión
+- [x] **Tests Unitarios:** Crear pruebas que validen que el bot responde correctamente usando prompts cargados desde archivos temporales (Mocks).
+- [ ] **Soporte Multilingüe:** Preparar la estructura de carpetas de prompts para admitir `/en/`, `/es/`, etc.
+
+---
+*Este TODO fue generado tras el análisis técnico del 31 de mayo de 2026.*

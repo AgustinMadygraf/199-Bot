@@ -32,6 +32,7 @@ from src.presentation.system_controller import SystemController
 from src.infrastructure.telegram.telegram_bot import TelegramBot
 from src.infrastructure.llm.groq_client import GroqLLMClient
 from src.infrastructure.f1.knowledge_repository import F1KnowledgeRepository
+from src.infrastructure.f1.prompt_repository import FilePromptRepository
 from src.infrastructure.f1_rag_gateway import F1RagGateway
 from src.infrastructure.f1_live_knowledge_gateway import F1LiveKnowledgeGateway
 from src.infrastructure.random.shuffler_adapter import RandomShuffler
@@ -60,7 +61,8 @@ else:
 
 knowledge_repo = F1KnowledgeRepository(F1RagGateway(chroma_repo), F1LiveKnowledgeGateway(f1_gateway))
 history_repo = SQLiteHistoryRepository()
-tutor_use_case = TutorUseCase(llm_client, knowledge_repo, history_repo)
+prompt_repo = FilePromptRepository()
+tutor_use_case = TutorUseCase(llm_client, knowledge_repo, history_repo, prompt_repo)
 
 audio_service = AudioService()
 audio_use_case = AudioUseCase(audio_service)
