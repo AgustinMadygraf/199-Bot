@@ -1,14 +1,12 @@
-# src/infrastructure/audio_service.py
-
 import os
 from groq import Groq
+from src.application.ports.audio_gateway import AudioGateway
 
-class AudioService:
-    """Servicio de infraestructura encargado de la transcripción de audio mediante Whisper."""
+class GroqAudioTranscriber:
+    """Implementación de infraestructura para la transcripción de audio mediante Whisper en Groq."""
     
-    def __init__(self):
-        # Inicializa su propio cliente de infraestructura aislado
-        self.client = Groq(api_key=os.environ["GROQ_API_KEY"])
+    def __init__(self, api_key: str):
+        self.client = Groq(api_key=api_key)
 
     async def transcribir_ogg(self, file_path: str) -> str:
         """Toma un archivo local en formato .ogg y devuelve su transcripción en texto."""

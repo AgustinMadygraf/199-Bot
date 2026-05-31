@@ -17,7 +17,7 @@ setup_logging()
 from src.infrastructure.db.sqlite_handler import init_db
 from src.infrastructure.db.metrics_repository import SQLiteMetricsRepository
 from src.infrastructure.db.history_repository import SQLiteHistoryRepository
-from src.infrastructure.audio_service import AudioService
+from src.infrastructure.groq_audio_transcriber import GroqAudioTranscriber
 from src.application.audio_use_case import AudioUseCase
 from src.application.chat_processor import ChatProcessorUseCase
 from src.application.quiz_use_case import QuizUseCase
@@ -68,7 +68,7 @@ history_repo = SQLiteHistoryRepository()
 prompt_repo = FilePromptRepository()
 tutor_use_case = TutorUseCase(llm_client, knowledge_repo, history_repo, prompt_repo)
 
-audio_service = AudioService()
+audio_service = GroqAudioTranscriber(obtener_groq_api_key())
 audio_use_case = AudioUseCase(audio_service)
 chat_processor = ChatProcessorUseCase(tutor_use_case, quiz_use_case, SQLiteMetricsRepository())
 
