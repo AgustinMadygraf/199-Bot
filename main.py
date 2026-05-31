@@ -36,11 +36,15 @@ from src.infrastructure.f1_rag_gateway import F1RagGateway
 from src.infrastructure.f1_live_knowledge_gateway import F1LiveKnowledgeGateway
 from src.infrastructure.random.shuffler_adapter import RandomShuffler
 from src.infrastructure.chroma_db_repository import ChromaDBRepository
+from src.infrastructure.pdf_service import PDFService
+from src.infrastructure.rag_indexer import RAGIndexer
 
 # 3. Inicialización de Componentes
 shuffler = RandomShuffler()
 f1_gateway = F1ApiGateway()
 chroma_repo = ChromaDBRepository()
+pdf_service = PDFService()
+indexer = RAGIndexer(chroma_repo, pdf_service)
 quiz_use_case = QuizUseCase(shuffler)
 
 # Inyección de dependencias para TutorUseCase
@@ -67,7 +71,6 @@ bot_service = TelegramBot(None, None, None)
 system_controller = SystemController(audio_use_case, bot_service, chat_processor, None, history_repo)
 
 # Ahora inyectamos el controlador en el bot
-# Bypass static type restrictions on attribute assignment when wiring controllers
 cast(Any, bot_service).system_controller = system_controller
 bot_service.race_controller = RaceController(f1_gateway)
 bot_service.quiz_controller = QuizController(quiz_use_case)
@@ -77,8 +80,7 @@ def main():
     init_db()
     
     logger.info("📚 Preparando sistema...")
-    # El indexado ahora se maneja de otra forma, si es necesario.
-    # Por ahora dejamos este placeholder.
+    indexer.indexar()
     
     # Encender el bot
     logger.info("🚀 Motor encendido: F1 Tutor Bot listo en Telegram.")
