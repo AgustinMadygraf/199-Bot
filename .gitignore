@@ -8,3 +8,4 @@ chroma_db/
 audio_*.ogg
 .venv/
 reglamento_pdfs/*
+docs/TMP.md

@@ -26,15 +26,19 @@ from src.application.chat_processor import ChatProcessorUseCase
 from src.application.quiz_use_case import QuizUseCase
 from src.application.tutor_use_case import TutorUseCase
 from src.presentation.race_controller import RaceController
+from src.infrastructure.f1_api_gateway import F1ApiGateway
 from src.presentation.quiz_controller import QuizController
 from src.presentation.system_controller import SystemController
 from src.infrastructure.telegram.telegram_bot import TelegramBot
 from src.infrastructure.llm.groq_client import GroqLLMClient
 from src.infrastructure.f1.knowledge_repository import F1KnowledgeRepository
+from src.infrastructure.f1_rag_gateway import F1RagGateway
+from src.infrastructure.f1_live_knowledge_gateway import F1LiveKnowledgeGateway
 from src.infrastructure.random.shuffler_adapter import RandomShuffler
 
 # 3. Inicialización de Componentes
 shuffler = RandomShuffler()
+f1_gateway = F1ApiGateway()
 quiz_use_case = QuizUseCase(shuffler)
 
 # Inyección de dependencias para TutorUseCase
@@ -50,7 +54,7 @@ else:
     # Por ahora lanzamos error si el provider no está soportado
     raise ValueError(f"Proveedor de LLM no soportado: {llm_provider}")
 
-knowledge_repo = F1KnowledgeRepository()
+knowledge_repo = F1KnowledgeRepository(F1RagGateway(), F1LiveKnowledgeGateway(f1_gateway))
 history_repo = DBHistoryRepository()
 tutor_use_case = TutorUseCase(llm_client, knowledge_repo, history_repo)
 
@@ -64,7 +68,8 @@ system_controller = SystemController(audio_service, bot_service, chat_processor,
 # Ahora inyectamos el controlador en el bot
 # Bypass static type restrictions on attribute assignment when wiring controllers
 cast(Any, bot_service).system_controller = system_controller
-bot_service.race_controller = RaceController()
+bot_service.race_controller = RaceController(f1_gateway)
+bot_service.race_controller = RaceController(f1_gateway)
 bot_service.quiz_controller = QuizController(quiz_use_case)
 
 def main():
