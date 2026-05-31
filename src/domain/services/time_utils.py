@@ -1,9 +1,10 @@
+"""
+Path: src/domain/entities/f1_models.py
+"""
+
 from datetime import datetime, timezone, timedelta
 
 def convert_utc_to_local(date_str: str, time_str: str, local_offset_hours: int = -3) -> str:
-    """
-    Convierte la fecha y hora UTC al huso horario local (por defecto GMT-3).
-    """
     try:
         time_clean = time_str.replace("Z", "")
         utc_dt = datetime.strptime(f"{date_str} {time_clean}", "%Y-%m-%d %H:%M:%S")

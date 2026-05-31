@@ -1,3 +1,7 @@
+"""
+Path: src/application/ports/f1_gateway.py
+"""
+
 from typing import Protocol, List, Optional
 from src.domain.entities.f1_models import DriverStanding, ConstructorStanding, RaceResult
 

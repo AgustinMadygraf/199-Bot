@@ -1,3 +1,7 @@
+"""
+Path: src/application/ports/weather_gateway.py
+"""
+
 from typing import Protocol
 
 class WeatherGateway(Protocol):

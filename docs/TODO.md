@@ -15,7 +15,7 @@
 ## Fase 3: Refactorización Final y Testing (En progreso)
 - [ ] Auditoría de dependencias: Identificar todos los usos de `src/infrastructure/f1_api.py`.
 - [ ] Implementar Presenters para formateo de datos de F1.
-- [ ] Migrar lógica de negocio y llamadas a API de `f1_api.py` a nuevos Gateways/Presenters.
+- [x] Migrar lógica de negocio y llamadas a API de `f1_api.py` a nuevos Gateways/Presenters.
 - [x] Eliminar legado (`src/infrastructure/f1_api.py`).
 - [x] Extract get_circuit_weather into a WeatherGateway.
 - [ ] Implementar pruebas unitarias completas con Mocks para todos los Gateways y Use Cases.

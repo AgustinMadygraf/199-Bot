@@ -1,3 +1,7 @@
+"""
+Path: src/application/ports/metrics_ports.py
+"""
+
 from typing import Protocol
 
 class MetricsRepository(Protocol):

@@ -1,3 +1,7 @@
+"""
+Path: src/domain/entities/f1_models.py
+"""
+
 from dataclasses import dataclass
 
 @dataclass(frozen=True)
