@@ -40,14 +40,16 @@ from src.infrastructure.f1_rag_gateway import F1RagGateway
 from src.infrastructure.f1_live_knowledge_gateway import F1LiveKnowledgeGateway
 from src.infrastructure.random.shuffler_adapter import RandomShuffler
 from src.infrastructure.quiz.json_quiz_repository import JsonQuizRepository
-from src.infrastructure.chroma_db_repository import ChromaDBRepository
 from src.infrastructure.chroma_db_status_adapter import ChromaDBStatusAdapter
+from src.infrastructure.db.chroma_vector_repository import ChromaVectorRepository
+from src.infrastructure.embeddings.sentence_transformer_service import SentenceTransformerService
 from src.infrastructure.pdf_service import PDFService
 from src.infrastructure.rag_indexer import RAGIndexer
 
 shuffler = RandomShuffler()
 f1_gateway = F1ApiGateway()
-chroma_repo = ChromaDBRepository()
+embedding_service = SentenceTransformerService()
+chroma_repo = ChromaVectorRepository(embedding_service)
 pdf_service = PDFService()
 indexer = RAGIndexer(chroma_repo, pdf_service)
 chroma_status_adapter = ChromaDBStatusAdapter(chroma_repo)

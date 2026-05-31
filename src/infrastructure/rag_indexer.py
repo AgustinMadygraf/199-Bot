@@ -1,10 +1,14 @@
+"""
+Path: src/infrastructure/rag_indexer.py
+"""
+
 import os
 from src.infrastructure.pdf_service import PDFService
-from src.infrastructure.chroma_db_repository import ChromaDBRepository
+from src.infrastructure.db.chroma_vector_repository import ChromaVectorRepository
 from src.infrastructure.settings.logger import logger
 
 class RAGIndexer:
-    def __init__(self, repository: ChromaDBRepository, pdf_service: PDFService):
+    def __init__(self, repository: ChromaVectorRepository, pdf_service: PDFService):
         self.repository = repository
         self.pdf_service = pdf_service
         self.PDF_DIR = "reglamento_pdfs"
