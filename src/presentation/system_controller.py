@@ -1,22 +1,19 @@
-"""
-Path: src/presentation/system_controller.py
-"""
-
-import os
-import uuid
 from telegram import Update
 from telegram.ext import ContextTypes
-from src.infrastructure.db import borrar_historial
+import uuid
 from src.infrastructure.settings.logger import logger
+from src.application.audio_use_case import AudioUseCase
+from src.application.ports.tutor_ports import HistoryRepository
 
 class SystemController:
     """Controlador que maneja comandos globales, interacciones de texto y mensajería de voz con seguridad avanzada."""
     
-    def __init__(self, audio_service, telegram_bot, chat_processor, rag_service):
-        self.audio_service = audio_service
+    def __init__(self, audio_use_case: AudioUseCase, telegram_bot, chat_processor, rag_service, history_repository: HistoryRepository):
+        self.audio_use_case = audio_use_case
         self.telegram_bot = telegram_bot
         self.chat_processor = chat_processor
         self.rag_service = rag_service
+        self.history_repository = history_repository
 
     async def cmd_start(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         rag_status = "✅ Reglamento FIA indexado" if self.rag_service.reglamento_disponible() else "⏳ Indexando reglamento..."
@@ -51,7 +48,7 @@ class SystemController:
             )
 
     async def cmd_reset(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
-        borrar_historial(update.effective_user.id)
+        self.history_repository.borrar(update.effective_user.id)
         await update.message.reply_text("✅ Historial borrado. ¡Volvemos a la largada!")
 
     async def manejar_mensaje(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -85,7 +82,6 @@ class SystemController:
 
         await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
         
-        path = None
         try:
             voice = update.message.voice or update.message.audio
             file = await context.bot.get_file(voice.file_id)
@@ -95,12 +91,8 @@ class SystemController:
             
             await file.download_to_drive(path)
             
-            texto = await self.audio_service.transcribir_ogg(path)
+            texto = await self.audio_use_case.transcribir(path)
             
-            if os.path.exists(path):
-                os.remove(path)
-                path = None
-                
             await update.message.reply_text(f"🎙️ Escuché: _{texto}_", parse_mode="Markdown")
             
             respuesta = await self.chat_processor.procesar(user_id, username, texto, "consulta_general_audio")
@@ -111,10 +103,3 @@ class SystemController:
         except Exception as e:
             logger.error(f"Error en audio: {e}")
             await update.message.reply_text("⚠️ No pude procesar el audio.")
-            
-        finally:
-            if path and os.path.exists(path):
-                try:
-                    os.remove(path)
-                except Exception as e:
-                    logger.error(f"No se pudo limpiar el archivo residual {path}: {e}")

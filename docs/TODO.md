@@ -9,11 +9,16 @@
 - [x] Crear F1ApiGateway en src/infrastructure/f1_api_gateway.py.
 - [x] Migrar lógica de get_last_race_results a F1ApiGateway.
 - [ ] Refactorizar F1KnowledgeRepository:
-    - [ ] Hacer que implemente src/application/ports/tutor_ports.py/KnowledgeRepository.
-    - [ ] Crear adaptador para f1_rag.py.
+    - [x] Implementar src/application/ports/tutor_ports.py/KnowledgeRepository.
+    - [ ] Crear adaptador para f1_rag.py (en progreso).
     - [ ] Separar lógica de orquestación (RAG vs API) fuera de la clase.
 - [ ] Refactorizar src/infrastructure/f1_api.py:
     - [ ] Migrar funciones restantes a F1ApiGateway o eliminarlas.
+- [ ] **Refactorizar SystemController (Nuevo):**
+    - [ ] Definir protocolo `HistoryGateway`.
+    - [ ] Implementar método `borrar` en `DBHistoryRepository`.
+    - [ ] Crear `AudioUseCase` para encapsular lógica de archivos y transcripción.
+    - [ ] Eliminar dependencias de `os` y módulos `db` en `SystemController`.
 
 ## Fase 3: Testing y Validación (Pendiente)
 - [ ] Crear Mocks para F1Gateway y KnowledgeRepository para tests unitarios.

@@ -17,11 +17,12 @@ cargar_configuracion()
 setup_logging()
 
 # 2. Importaciones de la Arquitectura
-from src.infrastructure.db import init_db, registrar_consulta
+from src.infrastructure.db.sqlite_handler import init_db, registrar_consulta
 from src.infrastructure.db.history_repository import DBHistoryRepository
 from src.infrastructure.f1_rag import indexar_reglamento
 import src.infrastructure.f1_rag as rag_service
 from src.infrastructure.audio_service import AudioService
+from src.application.audio_use_case import AudioUseCase
 from src.application.chat_processor import ChatProcessorUseCase
 from src.application.quiz_use_case import QuizUseCase
 from src.application.tutor_use_case import TutorUseCase
@@ -59,11 +60,12 @@ history_repo = DBHistoryRepository()
 tutor_use_case = TutorUseCase(llm_client, knowledge_repo, history_repo)
 
 audio_service = AudioService()
+audio_use_case = AudioUseCase(audio_service)
 chat_processor = ChatProcessorUseCase(tutor_use_case, quiz_use_case, registrar_consulta)
 
 # Inicializamos primero el bot, y luego el SystemController que lo necesita
 bot_service = TelegramBot(None, None, None) 
-system_controller = SystemController(audio_service, bot_service, chat_processor, rag_service)
+system_controller = SystemController(audio_use_case, bot_service, chat_processor, rag_service, history_repo)
 
 # Ahora inyectamos el controlador en el bot
 # Bypass static type restrictions on attribute assignment when wiring controllers
