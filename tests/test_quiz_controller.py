@@ -2,14 +2,14 @@ import pytest
 from unittest.mock import MagicMock
 from src.interface_adapters.controllers.quiz_controller import QuizController
 from src.application.quiz_use_case import QuizUseCase
-from src.presentation.presenters.quiz_presenter import QuizPresenter
+from src.interface_adapters.presenters.quiz_formatter import QuizFormatter
 from src.domain.entities.quiz import Pregunta
 
 @pytest.mark.asyncio
 async def test_cmd_quiz_returns_formatted_menu():
     # Arrange
     use_case = MagicMock(spec=QuizUseCase)
-    presenter = MagicMock(spec=QuizPresenter)
+    presenter = MagicMock(spec=QuizFormatter)
     presenter.formatear_menu_dificultad.return_value = "Menu"
     controller = QuizController(use_case, presenter)
     
@@ -27,7 +27,7 @@ async def test_iniciar_dificultad_returns_formatted_pregunta():
     pregunta = MagicMock(spec=Pregunta)
     use_case.iniciar_quiz.return_value = pregunta
     
-    presenter = MagicMock(spec=QuizPresenter)
+    presenter = MagicMock(spec=QuizFormatter)
     presenter.formatear_pregunta.return_value = "Pregunta Formateada"
     
     controller = QuizController(use_case, presenter)
@@ -49,7 +49,7 @@ async def test_responder_returns_formatted_result():
     # mock responder return: es_correcta, pregunta_respondida, finalizado, puntaje, total
     use_case.responder.return_value = (True, pregunta, True, 5, 5)
     
-    presenter = MagicMock(spec=QuizPresenter)
+    presenter = MagicMock(spec=QuizFormatter)
     presenter.formatear_resultado.return_value = "Resultado Final"
     
     controller = QuizController(use_case, presenter)

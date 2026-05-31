@@ -27,7 +27,7 @@ from src.interface_adapters.controllers.f1_controller import F1Controller
 from src.interface_adapters.presenters.f1_formatter import F1Formatter
 from src.infrastructure.f1_api_gateway import F1ApiGateway
 from src.interface_adapters.controllers.quiz_controller import QuizController
-from src.presentation.presenters.quiz_presenter import QuizPresenter
+from src.interface_adapters.presenters.quiz_formatter import QuizFormatter
 from src.application.message_orchestrator import MessageOrchestrator
 from src.interface_adapters.controllers.command_controller import CommandController
 from src.interface_adapters.controllers.message_controller import MessageController
@@ -50,7 +50,7 @@ chroma_repo = ChromaDBRepository()
 pdf_service = PDFService()
 indexer = RAGIndexer(chroma_repo, pdf_service)
 quiz_repo = JsonQuizRepository(data_path="data/quiz/preguntas.json")
-quiz_presenter = QuizPresenter()
+quiz_formatter = QuizFormatter()
 quiz_use_case = QuizUseCase(shuffler, quiz_repo)
 
 llm_provider = obtener_llm_provider()
@@ -74,7 +74,7 @@ chat_processor = ChatProcessorUseCase(tutor_use_case, quiz_use_case, SQLiteMetri
 
 registry = ControllerRegistry()
 
-quiz_controller = QuizController(quiz_use_case, quiz_presenter)
+quiz_controller = QuizController(quiz_use_case, quiz_formatter)
 f1_use_case = F1UseCase(f1_gateway)
 f1_formatter = F1Formatter()
 f1_controller = F1Controller(f1_use_case, f1_formatter)

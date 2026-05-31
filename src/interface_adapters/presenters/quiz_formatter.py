@@ -1,10 +1,6 @@
-"""
-Path: src/presentation/presenters/quiz_presenter.py
-"""
-
 from src.domain.entities.quiz import Pregunta
 
-class QuizPresenter:
+class QuizFormatter:
     def __init__(self):
         self.emojis = {"facil": "🟢", "medio": "🟡", "dificil": "🔴"}
 
