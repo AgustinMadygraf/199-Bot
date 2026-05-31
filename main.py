@@ -1,7 +1,3 @@
-"""
-Path: main.py
-"""
-
 from typing import Any, cast
 from src.infrastructure.settings.config import (
     cargar_configuracion, 
@@ -28,8 +24,10 @@ from src.application.tutor_use_case import TutorUseCase
 from src.presentation.race_controller import RaceController
 from src.infrastructure.f1_api_gateway import F1ApiGateway
 from src.presentation.quiz_controller import QuizController
+from src.presentation.presenters.quiz_presenter import QuizPresenter
 from src.presentation.system_controller import SystemController
 from src.infrastructure.telegram.telegram_bot import TelegramBot
+from src.infrastructure.telegram.controller_registry import ControllerRegistry
 from src.infrastructure.llm.groq_client import GroqLLMClient
 from src.infrastructure.f1.knowledge_repository import F1KnowledgeRepository
 from src.infrastructure.f1.prompt_repository import FilePromptRepository
@@ -48,6 +46,7 @@ chroma_repo = ChromaDBRepository()
 pdf_service = PDFService()
 indexer = RAGIndexer(chroma_repo, pdf_service)
 quiz_repo = JsonQuizRepository(data_path="data/quiz/preguntas.json")
+quiz_presenter = QuizPresenter()
 quiz_use_case = QuizUseCase(shuffler, quiz_repo)
 
 # Inyección de dependencias para TutorUseCase
@@ -70,23 +69,23 @@ audio_service = AudioService()
 audio_use_case = AudioUseCase(audio_service)
 chat_processor = ChatProcessorUseCase(tutor_use_case, quiz_use_case, SQLiteMetricsRepository())
 
-# Inicializamos primero el bot, y luego el SystemController que lo necesita
-bot_service = TelegramBot(None, None, None) 
-system_controller = SystemController(audio_use_case, bot_service, chat_processor, None, history_repo)
+# Registro de controladores
+registry = ControllerRegistry()
+system_controller = SystemController(audio_use_case, None, chat_processor, None, history_repo)
+registry.register("system", system_controller)
+registry.register("race", RaceController(f1_gateway))
+registry.register("quiz", QuizController(quiz_use_case, quiz_presenter))
 
-# Ahora inyectamos el controlador en el bot
-cast(Any, bot_service).system_controller = system_controller
-bot_service.race_controller = RaceController(f1_gateway)
-bot_service.quiz_controller = QuizController(quiz_use_case)
+# Inicializamos el bot con el registry
+bot_service = TelegramBot(registry)
+
+# Ahora inyectamos el controlador en el bot (si es necesario actualizar el SystemController)
+system_controller.bot = bot_service
 
 def main():
-    # Inicialización física de recursos de datos e IA
     init_db()
-    
     logger.info("📚 Preparando sistema...")
     indexer.indexar()
-    
-    # Encender el bot
     logger.info("🚀 Motor encendido: F1 Tutor Bot listo en Telegram.")
     bot_service.encender()
 
