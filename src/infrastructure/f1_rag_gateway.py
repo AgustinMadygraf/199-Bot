@@ -1,9 +1,9 @@
 from src.application.ports.rag_gateway import RagGateway
-from src.infrastructure.chroma_db_repository import ChromaDBRepository
+from src.infrastructure.db.chroma_vector_repository import ChromaVectorRepository
 from src.infrastructure.settings.logger import logger
 
 class F1RagGateway(RagGateway):
-    def __init__(self, repository: ChromaDBRepository):
+    def __init__(self, repository: ChromaVectorRepository):
         self.repository = repository
 
     def buscar_reglamento(self, consulta: str) -> str:
