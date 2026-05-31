@@ -24,7 +24,7 @@ from src.application.quiz_use_case import QuizUseCase
 from src.application.tutor_use_case import TutorUseCase
 from src.application.f1_use_case import F1UseCase
 from src.interface_adapters.controllers.f1_controller import F1Controller
-from src.presentation.presenters.f1_presenter import F1Presenter
+from src.interface_adapters.presenters.f1_formatter import F1Formatter
 from src.infrastructure.f1_api_gateway import F1ApiGateway
 from src.interface_adapters.controllers.quiz_controller import QuizController
 from src.presentation.presenters.quiz_presenter import QuizPresenter
@@ -76,8 +76,8 @@ registry = ControllerRegistry()
 
 quiz_controller = QuizController(quiz_use_case, quiz_presenter)
 f1_use_case = F1UseCase(f1_gateway)
-f1_presenter = F1Presenter()
-f1_controller = F1Controller(f1_use_case, f1_presenter)
+f1_formatter = F1Formatter()
+f1_controller = F1Controller(f1_use_case, f1_formatter)
 message_orchestrator = MessageOrchestrator(chat_processor, quiz_controller)
 command_controller = CommandController(indexer, history_repo)
 message_controller = MessageController(message_orchestrator, audio_use_case)

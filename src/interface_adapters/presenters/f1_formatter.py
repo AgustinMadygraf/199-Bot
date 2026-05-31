@@ -1,12 +1,12 @@
 """
-Path: src/presentation/presenters/f1_presenter.py
+Path: src/interface_adapters/presenters/f1_formatter.py
 """
 
 from typing import List, Optional
 from src.domain.entities.f1_models import DriverStanding, ConstructorStanding, RaceResult
 from src.domain.services.time_utils import convert_utc_to_local
 
-class F1Presenter:
+class F1Formatter:
     def format_driver_standings(self, standings: List[DriverStanding]) -> str:
         if not standings:
             return "No hay datos de clasificación de pilotos disponibles aún."
