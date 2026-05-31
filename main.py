@@ -36,6 +36,7 @@ from src.infrastructure.f1.prompt_repository import FilePromptRepository
 from src.infrastructure.f1_rag_gateway import F1RagGateway
 from src.infrastructure.f1_live_knowledge_gateway import F1LiveKnowledgeGateway
 from src.infrastructure.random.shuffler_adapter import RandomShuffler
+from src.infrastructure.quiz.json_quiz_repository import JsonQuizRepository
 from src.infrastructure.chroma_db_repository import ChromaDBRepository
 from src.infrastructure.pdf_service import PDFService
 from src.infrastructure.rag_indexer import RAGIndexer
@@ -46,7 +47,8 @@ f1_gateway = F1ApiGateway()
 chroma_repo = ChromaDBRepository()
 pdf_service = PDFService()
 indexer = RAGIndexer(chroma_repo, pdf_service)
-quiz_use_case = QuizUseCase(shuffler)
+quiz_repo = JsonQuizRepository(data_path="data/quiz/preguntas.json")
+quiz_use_case = QuizUseCase(shuffler, quiz_repo)
 
 # Inyección de dependencias para TutorUseCase
 llm_provider = obtener_llm_provider()

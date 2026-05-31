@@ -1,0 +1,12 @@
+{
+  "facil": [
+    {"texto": "¿Cuántos puntos vale ganar una carrera?", "opciones": ["20", "25", "30", "15"], "respuesta_correcta": "B", "explicacion": "El ganador se lleva 25 puntos."},
+    {"texto": "¿Cuántos equipos hay en la F1 2026?", "opciones": ["10", "12", "11", "9"], "respuesta_correcta": "C", "explicacion": "Son 11 equipos en 2026."}
+  ],
+  "medio": [
+    {"texto": "¿Qué es el undercut en F1?", "opciones": ["Adelantar por fuera", "Parar antes que el rival", "Usar DRS", "Salir último"], "respuesta_correcta": "B", "explicacion": "Entrar antes para ganar ventaja."}
+  ],
+  "dificil": [
+    {"texto": "¿Cuántos kW tiene el MGU-K en 2026?", "opciones": ["120 kW", "200 kW", "350 kW", "500 kW"], "respuesta_correcta": "C", "explicacion": "350 kW."}
+  ]
+}
